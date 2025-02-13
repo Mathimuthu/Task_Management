@@ -1,0 +1,48 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Models\User;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\RoleController;
+use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\TaskController;
+
+// Route::get('/', function () {
+//     return view('home');
+// });
+
+Route::get('/dashboard', function () {
+    return view('home');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(function () {
+    Route::get('/', function () {
+        return view('home');
+    });
+    Route::resource('users', UserController::class);
+    Route::resource('role', RoleController::class);
+    Route::post('/department/{id}/delete', [DepartmentController::class, 'destroy'])->name('department.destroy');
+    Route::resource('department', DepartmentController::class);
+    Route::resource('tasks', TaskController::class);
+});
+// Route::middleware(['auth', 'can:Admin'])->group(function () {
+//     // Resource routes
+//     Route::resource('users', UserController::class);
+//     Route::resource('department', DepartmentController::class);
+//     Route::resource('tasks', TaskController::class);
+
+//     Route::post('/department/{id}/delete', [DepartmentController::class, 'destroy'])->name('department.destroy');
+
+//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
+
+// Route::middleware('user')->group(function () {
+//     Route::resource('users', UserController::class);
+// });
+
+
+require __DIR__ . '/auth.php';

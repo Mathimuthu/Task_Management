@@ -1,0 +1,80 @@
+<x-adminlte-modal id="modalTask" title="Task Details" theme="purple" icon="fas fa-tasks" size='md'>
+    <form id="addTaskForm" method="POST" action="{{ route('tasks.store') }}">
+        @csrf
+
+        <div class="form-group">
+            <label for="title" class="text-black">Title</label>
+            <div class="input-group">
+                <input type="hidden" id="task_id" name="task_id">
+                <input type="text" id="title" name="title" class="form-control" placeholder="Enter task title"
+                    required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <!-- Description -->
+            <label class="mt-2">Description:</label>
+            <textarea id="description" name="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="priority">Priority</label>
+            <select id="priority" name="priority" class="form-control" required>
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="assign_date">Assign Date</label>
+            <input type="date" id="assign_date" name="assign_date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="deadline">Deadline</label>
+            <input type="date" id="deadline" name="deadline" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="department_id">Department</label>
+            <select id="department_id" name="department_id" class="form-control" required>
+                @php
+                    foreach ($departments as $value) {
+                        echo "<option value='" . $value->id . "'>" . $value->name . '</option>';
+                    }
+                @endphp
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="employee_ids">Assigned Employees</label>
+            <select id="employee_ids" name="employee_ids[]" class="form-control" multiple required>
+                @php
+                    foreach ($employees as $value) {
+                        echo "<option value='" . $value->id . "'>" . $value->name . '</option>';
+                    }
+                @endphp
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" class="form-control" required>
+                <option value="Pending" selected>Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-group">
+            <button id="submitButton" onclick="submitTaskForm()" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Task
+            </button>
+        </div>
+    </form>
+
+    <x-slot name="footerSlot" :null="true"></x-slot>
+</x-adminlte-modal>

@@ -27,6 +27,10 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
     Route::resource('department', DepartmentController::class);
     Route::resource('tasks', TaskController::class);
 });
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/tasks/status-timeline/{task}', [TaskController::class, 'getTaskTimeline'])->name('tasks.status.timeline');
+});
 // Route::middleware(['auth', 'can:Admin'])->group(function () {
 //     // Resource routes
 //     Route::resource('users', UserController::class);

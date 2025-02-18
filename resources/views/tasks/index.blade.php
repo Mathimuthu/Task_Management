@@ -29,17 +29,26 @@
 
     {{-- Themed Modal for Task --}}
     @include('tasks.create')
+    @include('tasks.statusUpdate')
+    @include('tasks.timeline')
+
 @stop
 
 @section('css')
     {{-- Add custom stylesheets --}}
     <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}">
 @stop
 
 @section('js')
+    <script src="{{ asset('js/select2.min.js') }}"></script>
     <script src="{{ asset('js/datatables.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+
+            // Initialize Select2
+            $('.js-example-basic-multiple').select2();
+
             $('#taskTable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -151,6 +160,17 @@
             $('#submitButton').text("Add Task");
         }
 
+        $(document).on('click', '.updateStatusBtn', function() {
+            let taskId = $(this).data("task-id");
+            let url = $(this).data("url");
+            let currentStatus = $(this).data("current-status");
+            // Set values in the modal form
+            $("#task_id").val(taskId);
+            $("#status").val(currentStatus).change();
+            $("#updateTaskForm").attr("action", url);
+            $('#statusUpdateModal').modal('show');
+        });
+
         function submitTaskForm() {
             $('#addTaskForm').submit(function(e) {
                 e.preventDefault();
@@ -162,6 +182,62 @@
                 $.ajax({
                     url: "{{ route('tasks.store') }}",
                     type: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success == 1) {
+                            submitButton.prop('disabled', false);
+                            submitButton.html('Save Task');
+                            $('#modalTask').modal('hide');
+                            $('#taskTable').DataTable().ajax.reload();
+                        } else {
+                            submitButton.prop('disabled', false);
+                            submitButton.html('Save Task');
+                            alert(response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('Error adding task.');
+                    }
+                });
+            });
+        }
+
+        $(document).on('click', '.viewTimelineBtn', function() {
+            let taskId = $(this).data("task-id");
+            let url = $(this).data("url");
+
+            $('#taskTimeline').html('<li>Loading...</li>'); // Show loading message
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function(response) {
+                    if (response.success) {
+                        $('#taskTimeline').html(response.html); // Insert generated HTML
+                    } else {
+                        $('#taskTimeline').html('<li>No status updates available.</li>');
+                    }
+                },
+                error: function() {
+                    $('#taskTimeline').html('<li>Error fetching timeline.</li>');
+                }
+            });
+
+            $('#taskTimelineModal').modal('show'); // Open modal
+        });
+
+
+        function submitTaskStatusForm() {
+            $('#updateTaskForm').submit(function(e) {
+                e.preventDefault();
+                let url = $(this).data("url");
+                let submitButton = $('#updateButton');
+                submitButton.prop('disabled', true);
+                submitButton.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+                alert(url);
+                $.ajax({
+                    url: url,
+                    type: "put",
                     data: $(this).serialize(),
                     success: function(response) {
                         if (response.success == 1) {

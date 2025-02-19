@@ -22,6 +22,7 @@ class TaskController extends Controller
         if ($request->ajax()) {
             $tasks = Task::select('tasks.*', 'departments.name as departmentname')
                 ->leftJoin('departments', 'tasks.department_id', '=', 'departments.id')
+                ->get()
                 ->map(function ($task) {
                     // Decode employee_ids JSON field
                     $employeeIds = json_decode($task->employee_ids, true);

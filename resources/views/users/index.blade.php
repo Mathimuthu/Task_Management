@@ -107,9 +107,17 @@
                     $("#registration_no").val(data.registration_no);
                     $('#mobile').val(data.mobile);
                     $('#email').val(data.email);
+                    $('#address').val(data.address);
+                    $('#dob').val(data.dob);
+                    $('#blood_group').val(data.blood_group);
                     $('#department_id').val(data.department_id).change();
                     $('#submitButton').text("Update Employee");
-                    $('#registration_no').val(data.registration_no);
+                    if (data.photo) {
+                        $('#photoPreview').attr('src', '{{ asset("") }}' + data.photo);
+                        $('#photoPreview').show();
+                    } else {
+                        $('#photoPreview').hide(); 
+                    }
                 },
                 error: function() {
                     alert("Error fetching data.");
@@ -146,6 +154,10 @@
             $('#name').val("");
             $('#mobile').val("");
             $('#email').val("");
+            $('#address').val("");
+            $('#dob').val("");
+            $('#blood_group').val("");
+            $('#photo').val("");
             $('#submitButton').text("Add Employee");
             $('#registration_no').val("");
         }
@@ -157,10 +169,13 @@
                 let submitButton = $('#submitButton'); // Change to the actual ID of your button
                 submitButton.prop('disabled', true); // Disable the button
                 submitButton.html('<i class="fa fa-spinner fa-spin"></i> Saving...'); // Add a loader icon
+                var formData = new FormData(this);
                 $.ajax({
                     url: "{{ route('users.store') }}",
                     type: "POST",
-                    data: $(this).serialize(),
+                    data: formData,
+                    contentType: false, 
+                    processData: false,
                     success: function(response) {
                         console.log(response);
                         if (response.success == 1) {
@@ -171,6 +186,10 @@
                             $('#name').val("");
                             $('#mobile').val("");
                             $('#email').val("");
+                            $('#address').val("");
+                            $('#dob').val("");
+                            $('#blood_group').val("");
+                            $('#photo').val("");
                             $('#submitButton').text("Add Employee");
                             $('#registration_no').val("");
                             $('#productTable').DataTable().ajax.reload(); // Refresh DataTable
@@ -181,6 +200,8 @@
                         }
                     },
                     error: function(xhr) {
+                        submitButton.prop('disabled', false); 
+                        submitButton.html('Save Employee');
                         alert('Error adding product.');
                     }
                 });

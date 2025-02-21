@@ -23,7 +23,7 @@
 
 
         <div class="form-group">
-            <button id="updateButton" type="submit" class="btn btn-primary">
+            <button id="updateButton"  onclick="submitTaskStatusForm()"  type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> Update Status
             </button>
         </div>

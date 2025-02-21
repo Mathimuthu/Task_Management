@@ -24,6 +24,13 @@ class User extends Authenticatable
         'password',
         'role',
         'mobile',
+        'registration_no',
+        'department_id',
+        'status',
+        'address',
+        'dob',
+        'blood_group',
+        'photo'
     ];
 
     /**

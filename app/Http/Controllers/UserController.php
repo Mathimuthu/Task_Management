@@ -30,7 +30,7 @@ class UserController extends Controller
             )
             ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
             ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->leftJoin('departments', 'users.id', '=', 'departments.manager_id')
+            ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
             ->whereNot('users.id', auth()->user()->id)
             ->groupBy(
                 'users.id', 
@@ -108,12 +108,20 @@ class UserController extends Controller
                 $userData['name'] = $request->name;
                 $userData['mobile'] = $request->mobile;
                 $userData['email'] = $request->email;
+                $userData['address'] = $request->address;
+                $userData['dob'] = $request->dob;
+                $userData['blood_group'] = $request->blood_group;
                 $userData['role'] = $request->role;
                 $userData['registration_no'] = $request->registration_no;
                 $userData['department_id'] = $request->department_id;
                 $userData['created_by'] = \Illuminate\Support\Facades\Auth::user()->id;
                 $userData['status'] = 1;
-
+                if ($request->hasFile('photo')) {
+                    $photo = $request->file('photo');
+                    $filename = time() . '.' . $photo->getClientOriginalExtension();
+                    $photo->move(public_path('employee'), $filename);
+                    $userData['photo'] = 'employee/' . $filename; 
+                }
                 if ($request->has('user_id') && !empty($request->user_id)) {
                     $user = User::find($request->user_id);
                     $role = Role::where('id', $request->role)->first();

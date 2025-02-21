@@ -231,14 +231,13 @@
         function submitTaskStatusForm() {
             $('#updateTaskForm').submit(function(e) {
                 e.preventDefault();
-                let url = $(this).data("url");
+                let url = $(this).attr("action");
                 let submitButton = $('#updateButton');
                 submitButton.prop('disabled', true);
                 submitButton.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
-                alert(url);
                 $.ajax({
                     url: url,
-                    type: "put",
+                    type: "PUT",
                     data: $(this).serialize(),
                     success: function(response) {
                         if (response.success == 1) {
@@ -253,6 +252,8 @@
                         }
                     },
                     error: function() {
+                        submitButton.prop('disabled', false);
+                        submitButton.html('Save Task');
                         alert('Error adding task.');
                     }
                 });

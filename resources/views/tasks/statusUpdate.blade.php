@@ -3,12 +3,12 @@
         @csrf
         @method('PUT')
 
-        <input type="hidden" id="task_id" name="task_id">
+        <input type="hidden" id="s_task_id" name="task_id" value="">
 
 
         <div class="form-group">
             <label for="status">Status</label>
-            <select id="status" name="status" class="form-control" required>
+            <select id="u_status" name="status" class="form-control" required>
                 <option value="Pending">Pending</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>

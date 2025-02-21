@@ -117,6 +117,7 @@
                     $('#deadline').val(data.deadline);
                     $('#department_id').val(data.department_id).change();
                     $('#employee_ids').val(JSON.parse(data.employee_ids)).change();
+                    $('#status').val(data.status);
                     $('#submitButton').text("Update Task");
                 },
                 error: function() {
@@ -165,8 +166,8 @@
             let url = $(this).data("url");
             let currentStatus = $(this).data("current-status");
             // Set values in the modal form
-            $("#task_id").val(taskId);
-            $("#status").val(currentStatus).change();
+            $("#s_task_id").val(taskId);
+            $("#u_status").val(currentStatus).change();
             $("#updateTaskForm").attr("action", url);
             $('#statusUpdateModal').modal('show');
         });

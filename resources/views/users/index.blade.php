@@ -15,9 +15,10 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Register.No</th>
                     <th>Mobile</th>
                     <th>Email</th>
-                    <th>Registration</th>
+                    <th>Department</th>
                     <th>Role</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -58,16 +59,20 @@
                         name: 'name'
                     },
                     {
+                        data: 'registration_no',
+                        name: 'registration_no'
+                    },
+                    {
                         data: 'mobile',
                         name: 'mobile'
                     },
                     {
                         data: 'email',
                         name: 'email'
-                    },
+                    },                   
                     {
-                        data: 'registration_no',
-                        name: 'registration_no'
+                        data: 'department_names',
+                        name: 'department_names'
                     },
                     {
                         data: 'role_name',
@@ -99,6 +104,7 @@
                     $('#modalCustomer').modal('show');
                     $('#user_id').val(data.id);
                     $('#name').val(data.name);
+                    $("#registration_no").val(data.registration_no);
                     $('#mobile').val(data.mobile);
                     $('#email').val(data.email);
                     $('#department_id').val(data.department_id).change();

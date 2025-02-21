@@ -131,9 +131,11 @@ if (isset($department)) {
                 url: url,
                 type: "GET",
                 success: function(data) {
+                    console.log(data);
                     $('#editModal').modal('show'); // Show modal
                     $('#department_id').val(data.id); // Populate form fields
                     $('#department_name').val(data.name);
+                    $('#employee_id').val(data.manager_id); 
                     $('#productTable').DataTable().ajax.reload(); // Refresh DataTable
                 },
                 error: function() {

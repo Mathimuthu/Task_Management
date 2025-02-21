@@ -9,6 +9,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -18,16 +19,33 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::select('users.*', 'roles.name as role_name')
-                ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                ->whereNot('users.id', auth()->user()->id)
-                ->get();
+            $users = User::select(
+                'users.id',
+                'users.name',
+                'users.mobile',
+                'users.email',
+                'users.registration_no',
+                'roles.name as role_name', 
+                DB::raw('GROUP_CONCAT(departments.name SEPARATOR ", ") as department_names')
+            )
+            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->leftJoin('departments', 'users.id', '=', 'departments.manager_id')
+            ->whereNot('users.id', auth()->user()->id)
+            ->groupBy(
+                'users.id', 
+                'users.name', 
+                'users.mobile', 
+                'users.email', 
+                'users.registration_no', 
+                'roles.name'
+            )
+            ->get();
 
             return DataTables::of($users)
                 ->addColumn('action', function ($product) {
                     $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn">Edit</button>';
-                    $deleteButton = '<button class="btn btn-sm btn-danger delete-btn" data-id="' . $product->id . '">Delete</button>';
+                    $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-id="' . $product->id . '">Delete</button>';
                     $returnData = "";
                     if ($this->checkPermissionBasedRole('write users')) {
                         $returnData = $editButton;

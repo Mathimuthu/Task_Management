@@ -42,18 +42,16 @@ class TaskController extends Controller
 
             return DataTables::of($tasks)
                 ->addColumn('action', function ($task) {
-                    $timelineButton = '<button 
-    data-url="' . route('tasks.status.timeline', $task->id) . '"  
-    class="btn btn-sm btn-info viewTimelineBtn" 
-    data-task-id="' . $task->id . '">
-    <i class="fas fa-history"></i> View Timeline
-</button>';
-
-                    $editButton = '<button data-url="' . route('tasks.edit', $task->id) . '" class="mr-2 btn btn-sm btn-primary edit-btn">Edit</button>';
-                    $deleteButton = '<button class="ml-2 btn btn-sm btn-danger delete-btn" data-id="' . $task->id . '">Delete</button>';
+                    $timelineButton = '<button data-url="' . route('tasks.status.timeline', $task->id) . '"  
+                        class="ml-1 btn btn-sm btn-info viewTimelineBtn" 
+                        data-task-id="' . $task->id . '">
+                        <i class="fas fa-history"></i> History
+                    </button>';
+                    $editButton = '<button data-url="' . route('tasks.edit', $task->id) . '" class="btn btn-sm btn-primary edit-btn">Edit</button>';
+                    $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-id="' . $task->id . '">Delete</button>';
                     $updateButton = '<button 
     data-url="' . route('tasks.update', ['task' => $task->id]) . '"  
-    class="btn btn-sm btn-success updateStatusBtn" 
+    class="ml-1 btn btn-sm btn-success updateStatusBtn" 
     data-task-id="' . $task->id . '" 
     data-current-status="' . $task->status . '">
     Update Status
@@ -212,7 +210,7 @@ class TaskController extends Controller
     public function getTaskTimeline($taskId)
     {
         // Fetch status updates from TaskDetail table
-        $taskDetails = Task::where('task_id', $taskId)
+        $taskDetails = TaskDetails::where('task_id', $taskId)
             ->orderBy('updated_at', 'ASC') // Order by earliest first
             ->get();
 

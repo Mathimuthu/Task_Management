@@ -67,53 +67,33 @@
     <script src="{{ asset('js/datatables.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
     <script>
-        $(document).ready(function() {
+       $(document).ready(function() {
             $('#productTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('users.index') }}",
-                columns: [{
-                        data: "id",
+                columns: [
+                    { 
+                        data: "id", 
                         "render": function(data, type, row, meta) {
-                            return meta.row + 1; // Uses row index
+                            return meta.row + 1; // Row index
                         }
                     },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'registration_no',
-                        name: 'registration_no'
-                    },
-                    {
-                        data: 'mobile',
-                        name: 'mobile'
-                    },
-                    {
-                        data: 'email',
-                        name: 'email'
-                    },                   
-                    {
-                        data: 'department_names',
-                        name: 'department_names'
-                    },
-                    {
-                        data: 'role_name',
-                        name: 'role_name'
-                    },
-                    {
-                        "data": "status",
+                    { data: 'name', name: 'name' },
+                    { data: 'registration_no', name: 'registration_no' },
+                    { data: 'mobile', name: 'mobile' },
+                    { data: 'email', name: 'email' },
+                    { data: 'department_names', name: 'department_names' },
+                    { data: 'role_name', name: 'role_name' },
+                    { 
+                        data: "status", 
                         "render": function(data, type, row) {
                             return data == 1 ? 'Active' : 'Inactive';
                         }
-                    }, {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
+                    },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ],
+                order: [[0, 'desc']]  // Set default order by the first column (id or created_at) descending
             });
         });
         $(document).on('click', '.updateStatusBtn', function() {

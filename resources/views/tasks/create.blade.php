@@ -48,10 +48,9 @@
             <label for="assign_date">Assign Date</label>
             <input type="date" id="assign_date" name="assign_date" class="form-control" required>
         </div>
-
         <div class="form-group">
             <label for="deadline">Deadline</label>
-            <input type="date" id="deadline" name="deadline" class="form-control" required>
+            <input type="date" id="deadline" name="deadline" class="form-control" required min="{{ \Carbon\Carbon::today()->toDateString() }}">
         </div>
         <div class="form-group" id="filePreview" style="display: none;">
             <!-- PDF or DOCX file will be previewed here -->

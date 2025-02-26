@@ -20,36 +20,37 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $usersQuery = User::select(
-                'users.id',
-                'users.name',
-                'users.mobile',
-                'users.email',
-                'users.registration_no',
-                'roles.name as role_name', 
-                'users.status',
-                DB::raw('GROUP_CONCAT(departments.name SEPARATOR ", ") as department_names'),
-                'users.deleted_at'
+            $usersQuery = User::select('users.*',              
+                'roles.name as role_name',   
+                'departments.name as department_names',                    
+                'users.department_id'
             )
-            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
-            ->whereNot('users.id', auth()->user()->id)
-            ->groupBy(
-                'users.id', 
-                'users.name', 
-                'users.mobile', 
-                'users.email', 
-                'users.registration_no', 
-                'roles.name',
-                'users.status',
-                'users.deleted_at'
-            );
+            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')   
+            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')              
+            ->leftJoin('departments', 'users.department_id', '=', 'departments.id');
+
+            // Apply the order by created_at in descending order by default
+            $usersQuery = $usersQuery->orderByDesc('users.created_at'); 
+
             if (auth()->user()->hasRole(1)) {
-                $users = $usersQuery->withTrashed()->get();  
-            } else {
-                $users = $usersQuery->get();
+                $usersQuery = $usersQuery->withTrashed();  // Include soft-deleted users if admin
             }
+
+            if (!auth()->user()->isAdmin()) {
+                $usersQuery = $usersQuery->where('users.id', auth()->user()->id); // Only show the logged-in user
+            }
+
+            // Apply sorting from DataTables if it's present
+            if ($request->has('order')) {
+                $columnIndex = $request->input('order.0.column');
+                $columnName = $request->input('columns.' . $columnIndex . '.data');
+                $direction = $request->input('order.0.dir'); // 'asc' or 'desc'
+
+                $usersQuery = $usersQuery->orderBy($columnName, $direction);
+            }
+
+            $users = $usersQuery->get();
+
             return DataTables::of($users)
                 ->addColumn('action', function ($product) {
                     $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit">
@@ -68,21 +69,21 @@ class UserController extends Controller
                             $restoreButton = '<button class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
                                                 <i class="fas fa-undo"></i>
                                             </button>';
-                         return $viewButton. $restoreButton;
+                        return $viewButton . $restoreButton;
                         }
                     }
-    
+
                     if (!$product->deleted_at) {
                         $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>';
                     }
-    
+
                     $returnData = "";
                     if ($this->checkPermissionBasedRole('write users')) {
                         $returnData .= $editButton . $updateButton;
                     }
-                    if ($this->checkPermissionBasedRole('delete users')  && !$product->deleted_at ) {
+                    if ($this->checkPermissionBasedRole('delete users') && !$product->deleted_at ) {
                         $returnData .= $deleteButton;
                     }
                     if ($this->checkPermissionBasedRole('read users')) {
@@ -96,6 +97,7 @@ class UserController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
+
         $departments = Department::select("*")->where('status', 1)->get();
         $roles = Role::select("*")->get();
         $hasCreatepermissions = $this->checkPermissionBasedRole('write users');

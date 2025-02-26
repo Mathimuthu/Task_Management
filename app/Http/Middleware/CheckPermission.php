@@ -18,6 +18,8 @@ class CheckPermission
             'edit' => 'write',
             'update' => 'write',
             'destroy' => 'delete',
+            'show' => 'read',
+            'restore' => 'write'
         ];
 
         // Get the current route name (e.g., "users.index")

@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\Department;
-use App\Models\TaskDetails;
+use App\Models\TaskDetail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -20,61 +22,72 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $tasks = Task::select('tasks.*', 'departments.name as departmentname')
+            $tasksQuery = Task::select('tasks.*', 'departments.name as departmentname', 
+                            'users1.name as username', 'users2.name as updatedby')
                 ->leftJoin('departments', 'tasks.department_id', '=', 'departments.id')
-                ->get()
-                ->map(function ($task) {
-                    // Decode employee_ids JSON field
-                    $employeeIds = json_decode($task->employee_ids, true);
-
-                    // Fetch user names
-                    $employees = User::whereIn('id', $employeeIds)->pluck('name')->toArray();
-
-                    // Add employee names as a string (comma-separated)
-                    $task->employee_names = implode(', ', $employees);
-
-                    return $task;
-                });
-
-            if (!auth()->user()->isAdmin()) {
-                $tasks = $tasks->whereIn('id', auth()->user()->id);
+                ->leftJoin('users as users1', 'tasks.employee_ids', '=', 'users1.id') 
+                ->leftJoin('users as users2', 'tasks.updated_by', '=', 'users2.id'); 
+            if (auth()->user()->hasRole(1)) {
+                $tasksQuery = $tasksQuery->withTrashed();
             }
-
+            $tasks = $tasksQuery->get();
+    
+            if (!auth()->user()->isAdmin()) {
+                $tasks = $tasks->whereIn('id', [auth()->user()->id]);
+            }
+    
             return DataTables::of($tasks)
-                ->addColumn('action', function ($task) {
-                    $timelineButton = '<button data-url="' . route('tasks.status.timeline', $task->id) . '"  
-                        class="ml-1 btn btn-sm btn-info viewTimelineBtn" 
-                        data-task-id="' . $task->id . '">
-                        <i class="fas fa-history"></i> History
-                    </button>';
-                    $editButton = '<button data-url="' . route('tasks.edit', $task->id) . '" class="btn btn-sm btn-primary edit-btn">Edit</button>';
-                    $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-id="' . $task->id . '">Delete</button>';
-                    $updateButton = '<button 
-    data-url="' . route('tasks.update', ['task' => $task->id]) . '"  
-    class="ml-1 btn btn-sm btn-success updateStatusBtn" 
-    data-task-id="' . $task->id . '" 
-    data-current-status="' . $task->status . '">
-    Update Status
-</button>';
-
-                    $returnData = "";
-                    if ($this->checkPermissionBasedRole('write tasks')) {
-                        $returnData = $editButton . $updateButton;
+            ->addColumn('action', function ($task) {
+                $timelineButton = '<button data-url="' . route('tasks.status.timeline', $task->id) . '"  
+                                    class="ml-1 btn btn-sm btn-info viewTimelineBtn" 
+                                    data-task-id="' . $task->id . '" title="View Timeline">
+                                    <i class="fas fa-history"></i> 
+                                 </button>';
+        
+                $editButton = '<button data-url="' . route('tasks.edit', $task->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit Task">
+                                <i class="fas fa-edit"></i>
+                              </button>';
+        
+                $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '" title="Delete Task">
+                                 <i class="fas fa-trash-alt"></i>
+                                </button>';
+        
+                $updateButton = '<button data-url="' . route('tasks.update', ['task' => $task->id]) . '"  
+                                 class="ml-1 btn btn-sm btn-success updateStatusBtn" data-task-id="' . $task->id . '" data-current-status="' . $task->status . '" title="Update Status">
+                                 <i class="fas fa-sync-alt"></i>
+                              </button>';
+        
+                $restoreButton = null;
+                if ($task->deleted_at) {
+                    if (auth()->user()->hasRole(1)) {
+                        $restoreButton = '<button class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('tasks.restore', $task->id) . '" title="Restore Task">
+                                          <i class="fas fa-undo"></i>
+                                       </button>';
+                        return $restoreButton . $timelineButton;
                     }
-                    if ($this->checkPermissionBasedRole('delete tasks')) {
-                        $returnData = $returnData . $deleteButton;
-                    }
-                    return $returnData . $timelineButton;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+                }
+        
+                $returnData = "";
+                if ($this->checkPermissionBasedRole('write tasks')) {
+                    $returnData = $editButton . $updateButton;
+                }
+                if ($this->checkPermissionBasedRole('delete tasks')) {
+                    $returnData = $returnData . $deleteButton;
+                }
+                if ($restoreButton) {
+                    $returnData .= $restoreButton;
+                }
+                return $returnData . $timelineButton;
+            })
+            ->rawColumns(['action'])
+            ->make(true);        
         }
-
+    
         $departments = Department::where('status', 1)->get();
         $employees = User::where('status', 1)->get();
         $roles = Role::all();
         return view('tasks.index', compact('departments', 'employees', 'roles'));
-    }
+    }    
 
     /**
      * Search tasks.
@@ -109,8 +122,8 @@ class TaskController extends Controller
             'deadline' => 'nullable|date',
             'department_id' => 'required|integer',
             // 'role_id' => 'required|integer',
-            'employee_ids' => 'required|array',
-            'status' => 'required|in:Pending,In Progress,Completed'
+            'employee_ids' => 'required',
+            'status' => 'required|in:Pending,In Progress,Completed',
         ]);
 
         if ($validator->fails()) {
@@ -126,32 +139,83 @@ class TaskController extends Controller
                 'deadline' => $request->deadline,
                 'department_id' => $request->department_id,
                 'role_id' => $request->role_id,
-                'employee_ids' => json_encode($request->employee_ids),
+                'employee_ids' => (int)$request->employee_ids,
                 'status' => $request->status,
-                'created_by' => Auth::user()->id,
+                'updated_by' => Auth::user()->id,
             ];
-
+            if ($request->hasFile('upload_task')) {
+                $uploadTask = $request->file('upload_task');
+                $filename = time() . '.' . $uploadTask->getClientOriginalExtension();
+                $uploadTask->move(public_path('upload_tasks'), $filename); 
+                $taskData['upload_task'] = 'upload_tasks/' . $filename; 
+            }    
             if ($request->has('task_id') && !empty($request->task_id)) {
                 $task = Task::find($request->task_id);
-                $task->update($taskData);
-                return ['success' => 1, 'msg' => "Task Updated Successfully"];
+                if ($task) {
+                    $task->update($taskData);
+                    TaskDetail::create([
+                        'task_id' => $task->id,
+                        'meta_data' => json_encode([
+                            'task_details' => [
+                                'task_module' => 'task_updated',
+                                'title' => $request->title,
+                                'description' => $request->description,
+                                'priority' => $request->priority,
+                                'date' => $request->assign_date,
+                                'deadline' => $request->deadline,
+                                'department_id' => $request->department_id,
+                                'role_id' => $request->role_id,
+                                'employee_ids' => $request->employee_ids,
+                                'status' => $request->status,
+                                'updated_by' => auth()->user()->id
+                            ]
+                        ])
+                    ]);
+                }
+                return response()->json(['success' => 1, 'msg' => "Task Updated Successfully"]);
             } else {
                 $task = Task::create($taskData);
-                // Insert into task_details table
-                TaskDetails::create([
+                TaskDetail::create([
                     'task_id' => $task->id,
-                    'pending_date' => $request->status === 'Pending' ? now() : null,
-                    'inprogress_date' => $request->status === 'In Progress' ? now() : null,
-                    'completed_date' => $request->status === 'Completed' ? now() : null,
-                    'cancelled_date' => $request->status === 'Cancelled' ? now() : null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'meta_data' => json_encode([
+                        'task_details' => [
+                            'task_module' => 'task_created',
+                            'title' => $request->title,
+                            'description' => $request->description,
+                            'priority' => $request->priority,
+                            'date' => $request->assign_date,
+                            'deadline' => $request->deadline,
+                            'department_id' => $request->department_id,
+                            'role_id' => $request->role_id,
+                            'employee_ids' => $request->employee_ids,
+                            'status' => $request->status,
+                            'updated_by' => auth()->user()->id
+                        ]
+                    ])
+                ]);                
+                return response()->json([
+                    'success' => 1,
+                    'msg' => 'Task Created Successfully'
                 ]);
-                return ['success' => 1, 'msg' => "Task Created Successfully"];
             }
         } catch (\Exception $e) {
             return ['success' => 0, 'msg' => $e->getMessage()];
         }
+    }
+
+    public function getUserDepartment(Request $request)
+    {
+        $employeeId = $request->get('employee_id');
+        $user = User::find($employeeId);
+
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'department_id' => $user->department_id,  
+            ]);
+        }
+
+        return response()->json(['success' => false]);
     }
 
     /**
@@ -175,28 +239,25 @@ class TaskController extends Controller
 
         // Find the task by ID
         $task = Task::findOrFail($id);
-        $taskDetails = TaskDetails::findOrFail($task->id);
-
         // Update task status and description
         $task->update([
             'status' => $request->status,
+            'description' => $request->description
         ]);
-
         // Update or Insert in task_details
-        $taskDetails->update(
-            [
-                'pending_date' => $request->status === 'Pending' ? now() : $taskDetails->pending_date,
-                'inprogress_date' => $request->status === 'In Progress' ? now() : $taskDetails->inprogress_date,
-                'completed_date' => $request->status === 'Completed' ? now() : $taskDetails->completed_date,
-                'cancelled_date' => $request->status === 'Cancelled' ? now() : $taskDetails->cancelled_date,
-                'in_progress_desc' => $request->status === 'In Progress' ? $request->description : $taskDetails->cancelled_date,
-                'completed_desc' => $request->status === 'Completed' ? $request->description : $taskDetails->completed_desc,
-                'cancelled_desc' => $request->status === 'Cancelled' ? $request->description : $taskDetails->cancelled_desc,
-                'updated_at' => now(),
-            ]
-        );
+        TaskDetail::create([
+            'task_id' => $task->id,
+            'meta_data' => json_encode([
+                'task_details' => [
+                    'task_module' => 'taskstatus_updated',
+                    'task_status' => $request->status,
+                    'description' => $request->description,
+                    'updated_by' => auth()->user()->id
+                ]
+            ])
+        ]);        
 
-        return redirect()->back()->with('success', 'Task status updated successfully!');
+        return ['success' => 1, 'msg' => "Task Updated Successfully"];
     }
 
     /**
@@ -204,17 +265,26 @@ class TaskController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $task = Task::findOrFail($id);
+        $task->delete(); 
+        TaskDetail::create([
+            'task_id' => $task->id,
+            'meta_data' => json_encode([
+                'task_module' => 'task_deleted',
+                'updated_by' => auth()->user()->id
+            ])
+        ]);        
+        return redirect()->back()->with('success', 'Task deleted successfully');
     }
 
     public function getTaskTimeline($taskId)
     {
         // Fetch status updates from TaskDetail table
-        $taskDetails = TaskDetails::where('task_id', $taskId)
+        $taskDetail = TaskDetail::where('task_id', $taskId)
             ->orderBy('updated_at', 'ASC') // Order by earliest first
             ->get();
 
-        if ($taskDetails->isEmpty()) {
+        if ($taskDetail->isEmpty()) {
             return response()->json(['success' => false, 'html' => '<li>No status updates available.</li>']);
         }
 
@@ -229,7 +299,7 @@ class TaskController extends Controller
         // Build the timeline HTML
         $timelineHtml = '<ul class="timeline-list">';
 
-        foreach ($taskDetails as $detail) {
+        foreach ($taskDetail as $detail) {
             // Iterate over each status and check if a date exists
             foreach ($statusMap as $dateField => $status) {
                 if (!empty($detail->$dateField)) { // Only show statuses with valid dates
@@ -246,5 +316,12 @@ class TaskController extends Controller
         $timelineHtml .= '</ul>';
 
         return response()->json(['success' => true, 'html' => $timelineHtml]);
+    }
+    public function restore($id)
+    {
+        $task = Task::onlyTrashed()->findOrFail($id);
+        $task->restore();
+
+        return response()->json(['success' => true, 'message' => 'Task restored successfully']);
     }
 }

@@ -17,28 +17,48 @@ class DepartmentController extends Controller
     {
         if ($request->ajax()) {
             $products = Department::select('departments.*', 'users.name as manager_name')
-                ->leftJoin('users', 'users.id', '=', 'departments.manager_id');
+                ->leftJoin('users', 'users.id', '=', 'departments.manager_id')
+                ->get();
+    
             return DataTables::of($products)
                 ->addColumn('action', function ($product) {
+                    $editButton = '<button data-url="' . route('department.edit', $product->id) . '" data-id="' . $product->id . '" data-toggle="modal" data-target="#modalPurple" class="mr-2 btn btn-sm btn-primary edit-btn" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                </button>';
 
-                    $editButton = '<button data-url="' . route('department.edit', $product->id) . '"data-id="' . $product->id . ' data-toggle="modal" data-target="#modalPurple" class="mr-2 btn btn-sm btn-primary edit-btn">Edit</button>';
-                    $deleteButton = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('department.destroy', $product->id) . '" data-id="' . $product->id . '">Delete</button>';
+                    $deleteButton = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('department.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>';
                     $returnData = "";
+    
                     if ($this->checkPermissionBasedRole('write department')) {
                         $returnData = $editButton;
                     }
                     if ($this->checkPermissionBasedRole('delete department')) {
                         $returnData = $returnData . $deleteButton;
                     }
+    
                     return $returnData;
+                })
+                ->addColumn('manager_name', function ($product) {
+                    // Check if manager_id is not null or empty
+                    $managerIds = json_decode($product->manager_id, true); // Decode as an array
+                    if (is_array($managerIds) && !empty($managerIds)) {
+                        $managers = User::whereIn('id', $managerIds)->pluck('name')->toArray();
+                        return implode(', ', $managers);
+                    } else {
+                        return 'No manager assigned'; // Return a default message if no manager
+                    }
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
+    
         $employees = User::where('status', 1)->where('role', 2)->get();
         $hasCreatepermissions = $this->checkPermissionBasedRole('write department');
+    
         return view('department.index', compact('employees', 'hasCreatepermissions'));
-    }
+    }    
 
     /**
      * Show the form for creating a new resource.
@@ -53,27 +73,103 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$this->checkPermissionBasedRole('write department')) {
-            return response()->json(['error' => 'Permission denied']);
-        }
         $request->validate([
-            'name' => 'required|string|max:64',
+            'name' => 'required|string|max:255',
         ]);
-        $departmentData = [];
-        $departmentData['name'] = $request->name;
-        $departmentData['manager_id'] = $request->employee_id;
-        $departmentData['description'] = $request->description;
-        $departmentData['status'] = 1;
+    
+        try {
+            if ($request->has('department_id') && !empty($request->department_id)) {
+                $department = Department::find($request->department_id);
+                if (!$department) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'Department not found.',
+                    ]);
+                }
+                $department->name = $request->name;
+                $department->description = $request->description;
+                $department->status = 1;
+    
+                if ($request->has('employee_id')) {
+                    $managerIds = array_unique(array_map('intval', $request->employee_id));
+    
+                    foreach ($managerIds as $managerId) {
+                        $user = User::find($managerId);
+                        if ($user) {
+                            $oldDepartmentId = $user->department_id;
+    
+                            if ($oldDepartmentId != $department->id) {
+                                if ($oldDepartmentId) {
+                                    $oldDepartment = Department::find($oldDepartmentId);
+                                    if ($oldDepartment) {
+                                        $oldManagerIds = json_decode($oldDepartment->manager_id, true);
+                                        $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
+                                        $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
+                                        $oldDepartment->save();
+                                    }
+                                }
+    
+                                $user->department_id = $department->id;
+                                $user->save();
+                            }
+                        }
+                    }
+    
+                    $department->manager_id = json_encode(array_values($managerIds));
+                } else {
+                    $department->manager_id = json_encode([]); 
+                }
+    
+                $department->save();
+            } else {
+                $department = Department::create([
+                    'name' => $request->name,
+                    'description' => $request->description,
+                    'status' => 1,
+                    'manager_id' => $request->has('employee_id') ? json_encode(array_map('intval', $request->employee_id)) : json_encode([]),
+                ]);
+                if ($request->has('employee_id')) {
+                    $managerIds = array_unique(array_map('intval', $request->employee_id));
 
-        if (isset($request->id) && !empty($request->id)) {
-            $department = Department::find($request->id);
-            $department->update($departmentData);
-            return redirect()->route('department.index')->with('success', 'Department updated successfully!');
-        } else {
-            $department = Department::create($departmentData);
-            return redirect()->route('department.index')->with('success', 'Department added successfully!');
+                    foreach ($managerIds as $managerId) {
+                        $user = User::find($managerId);
+                        if ($user) {
+                            $oldDepartmentId = $user->department_id;
+
+                            if ($oldDepartmentId) {
+                                $oldDepartment = Department::find($oldDepartmentId);
+                                if ($oldDepartment) {
+                                    $oldManagerIds = json_decode($oldDepartment->manager_id, true);
+                                    $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
+                                    $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
+                                    $oldDepartment->save();
+                                }
+                            }
+                            $user->department_id = $department->id;
+                            $user->save();
+                        }
+                    }
+
+                    $department->manager_id = json_encode(array_values($managerIds));
+                } else {
+                    $department->manager_id = json_encode([]);
+                }
+
+                $department->save();
+            }
+    
+            return response()->json([
+                'success' => true,
+                'msg' => 'Department saved successfully!',
+                'redirect_url' => route('department.index'),
+            ]);
+            } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'msg' => 'Error: ' . $e->getMessage(),
+            ]);
         }
-    }
+    }    
 
     /**
      * Display the specified resource.
@@ -100,6 +196,7 @@ class DepartmentController extends Controller
         if (!$this->checkPermissionBasedRole('write department')) {
             return response()->json(['error' => 'Permission denied']);
         }
+    
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:64',
         ]);
@@ -107,21 +204,33 @@ class DepartmentController extends Controller
             $output = array('success' => 0, 'msg' => $validator->errors()->first());
             return redirect()->back()->withErrors($validator)->withInput()->with('status', $output);
         }
+    
         $departmentData = [];
         $departmentData['name'] = $request->name;
         $departmentData['status'] = 1;
-        $departmentData['manager_id'] = $request->employee_id;
         $departmentData['description'] = $request->description;
-        $departmentData['status'] = 1;
-
-        if (isset($request->id) && !empty($request->id)) {
-            $department = Department::find($request->id);
-            $department->update($departmentData);
-            return redirect()->route('department.index')->with('success', 'Department updated successfully!');
-        } else {
-            $department = Department::create($departmentData);
-            return redirect()->route('department.index')->with('success', 'Department added successfully!');
+    
+        $managerIds = $request->employee_id;
+        $existingManagerIds = json_decode(Department::find($id)->manager_id ?? '[]');
+    
+        if ($existingManagerIds) {
+            $managerIds = array_unique(array_merge($existingManagerIds, $managerIds)); // Merge old and new unique manager ids
         }
+    
+        $departmentData['manager_id'] = json_encode($managerIds); // Store as a JSON string
+    
+        $department = Department::find($id);
+        $department->update($departmentData);
+    
+        foreach ($managerIds as $managerId) {
+            $user = User::find($managerId);
+            if ($user) {
+                // Assign department_id to the user
+                $user->department_id = $department->id;
+                $user->save();
+            }
+        }
+        return redirect()->route('department.index')->with('success', 'Department updated successfully!');
     }
 
     /**

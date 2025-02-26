@@ -4,29 +4,29 @@
         @csrf
 
         <div class="form-group">
-            <label for="barcode" class="text-black">Name</label>
+            <label for="barcode" class="text-black">Name <span style="color: red;">*</span> </label>
             <div class="input-group">
                 <input type="hidden" id="user_id" name="user_id">
-                <input type="text" id="name" name="name" class="form-control" placeholder="Enter the Name"
-                    required>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Enter the Name" 
+                    pattern="[A-Za-z\s]+" title="Only alphabetic characters are allowed" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="product_name">Registration Number</label>
+            <label for="product_name">Registration Number <span style="color: red;">*</span> </label>
             <input type="text" id="registration_no" name="registration_no" class="form-control"
-                placeholder="Enter the Registration number">
+                placeholder="Enter the Registration number" required>
         </div>
 
         <div class="form-group">
-            <label for="product_name">Mobile</label>
+            <label for="product_name">Mobile <span style="color: red;">*</span> </label>
             <input type="text" min="10" max="10" id="mobile" pattern="\d+" name="mobile"
                 class="form-control" placeholder="Enter the Mobile Number" required>
         </div>
 
         <!-- Role Select -->
         <div class="form-group">
-            <label for="category">Role</label>
+            <label for="category">Role <span style="color: red;">*</span> </label>
             <div class="input-group">
                 <select id="role" name="role" class="form-control" required>
                     @php
@@ -45,9 +45,9 @@
 
         <!-- Department Select -->
         <div class="form-group">
-            <label for="category">Department</label>
+            <label for="category">Department <span style="color: red;">*</span> </label>
             <div class="input-group">
-                <select id="department_id" name="department_id" class="form-control">
+                <select id="department_id" name="department_id" class="form-control" required>
                     <option>Select the Department</option>
                     @php
                         foreach ($departments as $value) {
@@ -64,16 +64,17 @@
         </div>
 
         <div class="form-group">
-            <label for="stock">Email</label>
-            <input type="email" id="email" name="email" placeholder="Enter Email" class="form-control">
+            <label for="stock">Email <span style="color: red;">*</span> </label>
+            <input type="email" id="email" name="email" placeholder="Enter Email" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" name="address" placeholder="Enter Address" class="form-control">
+            <label for="address">Address <span style="color: red;">*</span> </label>
+            <input type="text" id="address" name="address" placeholder="Enter Address" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="dob">DOB</label>
-            <input type="date" id="dob" name="dob" placeholder="Enter Date of birth" class="form-control">
+            <label for="dob">DOB <span style="color: red;">*</span> </label>
+            <input type="date" id="dob" name="dob" class="form-control" placeholder="Enter Date of Birth" 
+            max="{{ date('Y-m-d') }}" required>
         </div>
         <div class="form-group">
             <label for="blood_group">Blood Group</label>

@@ -9,6 +9,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -19,14 +20,16 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::select(
+            $usersQuery = User::select(
                 'users.id',
                 'users.name',
                 'users.mobile',
                 'users.email',
                 'users.registration_no',
                 'roles.name as role_name', 
-                DB::raw('GROUP_CONCAT(departments.name SEPARATOR ", ") as department_names')
+                'users.status',
+                DB::raw('GROUP_CONCAT(departments.name SEPARATOR ", ") as department_names'),
+                'users.deleted_at'
             )
             ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
             ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
@@ -38,20 +41,55 @@ class UserController extends Controller
                 'users.mobile', 
                 'users.email', 
                 'users.registration_no', 
-                'roles.name'
-            )
-            ->get();
-
+                'roles.name',
+                'users.status',
+                'users.deleted_at'
+            );
+            if (auth()->user()->hasRole(1)) {
+                $users = $usersQuery->withTrashed()->get();  
+            } else {
+                $users = $usersQuery->get();
+            }
             return DataTables::of($users)
                 ->addColumn('action', function ($product) {
-                    $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn">Edit</button>';
-                    $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-id="' . $product->id . '">Delete</button>';
+                    $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>';   
+                    $updateButton = '<button data-url="' . route('users.update', ['user' => $product->id]) . '"  
+                                    class="ml-1 btn btn-sm btn-success updateStatusBtn" data-users-id="' . $product->id . '" data-current-status="' . $product->status . '" title="Change Status">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>';
+                    $viewButton = '<button class="ml-1 btn btn-sm btn-secondary view-btn" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </button>';
+                    $restoreButton = null;
+                    if ($product->deleted_at) {
+                        if (auth()->user()->hasRole(1)) {
+                            $restoreButton = '<button class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
+                                                <i class="fas fa-undo"></i>
+                                            </button>';
+                         return $viewButton. $restoreButton;
+                        }
+                    }
+    
+                    if (!$product->deleted_at) {
+                        $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>';
+                    }
+    
                     $returnData = "";
                     if ($this->checkPermissionBasedRole('write users')) {
-                        $returnData = $editButton;
+                        $returnData .= $editButton . $updateButton;
                     }
-                    if ($this->checkPermissionBasedRole('delete users')) {
-                        $returnData = $returnData . $deleteButton;
+                    if ($this->checkPermissionBasedRole('delete users')  && !$product->deleted_at ) {
+                        $returnData .= $deleteButton;
+                    }
+                    if ($this->checkPermissionBasedRole('read users')) {
+                        $returnData .= $viewButton;
+                    }
+                    if ($restoreButton) {
+                        $returnData .= $restoreButton;
                     }
                     return $returnData;
                 })
@@ -104,6 +142,7 @@ class UserController extends Controller
             return $output;
         } else {
             try {
+                $department = Department::find($request->department_id);              
                 $userData = [];
                 $userData['name'] = $request->name;
                 $userData['mobile'] = $request->mobile;
@@ -121,18 +160,39 @@ class UserController extends Controller
                     $filename = time() . '.' . $photo->getClientOriginalExtension();
                     $photo->move(public_path('employee'), $filename);
                     $userData['photo'] = 'employee/' . $filename; 
-                }
+                }                
                 if ($request->has('user_id') && !empty($request->user_id)) {
                     $user = User::find($request->user_id);
                     $role = Role::where('id', $request->role)->first();
                     if (!$user->hasRole($role->name)) {
                         $user->syncRoles($role);
                     }
+                    if ($request->has('department_id')) {
+                        // Get existing managers of the department
+                        $existingDepartment = Department::find($request->department_id);
+                        $currentManagers = $existingDepartment->manager_id ? json_decode($existingDepartment->manager_id) : [];
+                        // Avoid adding the same user multiple times
+                        if (!in_array($user->id, $currentManagers)) {
+                            $currentManagers[] = $user->id; // Add new user to the list
+                        }
+                        $existingDepartment->manager_id = json_encode($currentManagers);
+                        $existingDepartment->save();
+                    } 
                     $user->update($userData);
                     return array('success' => 1, 'msg' => "Employee Updated Successfully");
                 } else {
                     $userData['password'] = bcrypt("12345678");
                     User::create($userData);
+                    if ($department) {
+                        // Get current managers, add new user
+                        $currentManagers = $department->manager_id ? json_decode($department->manager_id) : [];
+                        if (!in_array($user->id, $currentManagers)) {
+                            $currentManagers[] = $user->id;
+                        }
+                        // Update the department manager list
+                        $department->manager_id = json_encode($currentManagers);
+                        $department->save();
+                    }
                     return array('success' => 1, 'msg' => "Employee Created Successfully");
                 }
             } catch (\Exception $e) {
@@ -144,9 +204,45 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $user = User::select(
+            'users.id',
+            'users.name',
+            'users.registration_no',
+            'users.mobile',
+            'users.email',
+            'users.status',
+            'users.dob',
+            'users.blood_group',
+            'users.address',
+            'roles.name as role_name',
+            'users.photo',
+            DB::raw('GROUP_CONCAT(departments.name SEPARATOR ", ") as department_names'),
+            'users1.name as createdby'
+        )
+        ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+        ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
+        ->leftJoin('users as users1', 'users.created_by', '=', 'users1.id')
+        ->where('users.id', $id)
+        ->groupBy(
+            'users.id', 
+            'users.name', 
+            'users.registration_no', 
+            'users.mobile', 
+            'users.email', 
+            'users.status',
+            'users.dob',
+            'users.blood_group',
+            'users.address',
+            'roles.name',
+            'users.photo',
+            'users1.name'
+        )
+        ->first(); 
+
+        return response()->json($user);
     }
 
     /**
@@ -166,7 +262,17 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'status' => 'required',
+        ]);
+
+        // Find the task by ID
+        $user = user::findOrFail($id);
+
+        $user->update([
+            'status' => $request->status,
+        ]);
+        return redirect()->back()->with('success', 'user status updated successfully!');
     }
 
     /**
@@ -174,6 +280,16 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+        return redirect()->back()->with('success', 'User deleted successfully');
     }
+    public function restore($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+
+        return response()->json(['success' => true, 'message' => 'User restored successfully']);
+    }
+
 }

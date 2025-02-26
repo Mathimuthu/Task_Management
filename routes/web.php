@@ -21,14 +21,16 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
     Route::get('/', function () {
         return view('home');
     });
+    Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('users', UserController::class);
     Route::resource('role', RoleController::class);
     Route::post('/department/{id}/delete', [DepartmentController::class, 'destroy'])->name('department.destroy');
     Route::resource('department', DepartmentController::class);
     Route::resource('tasks', TaskController::class);
+    Route::get('/get-user-department', [TaskController::class, 'getUserDepartment'])->name('getUserDepartment');
+    Route::post('/tasks/{id}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
 });
 Route::middleware(['auth'])->group(function () {
-
     Route::get('/tasks/status-timeline/{task}', [TaskController::class, 'getTaskTimeline'])->name('tasks.status.timeline');
 });
 // Route::middleware(['auth', 'can:Admin'])->group(function () {

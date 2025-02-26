@@ -1,17 +1,23 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
-
+@section('title', 'Departments')
+<style>
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    color: black !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #f0f0f0 !important; 
+}
+</style>
 @section('content')
     <div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Department List</h2>
             @if ($hasCreatepermissions)
-                <a href="{{ route('department.create') }}" data-toggle="modal" data-target="#modalPurple"
-                    class="bg-purple btn">Add Department</a>
+            <button onclick="showAddDepartmentModal()" class="bg-purple btn">Add Department</button>
             @endif
         </div>
-        <table id="productTable" class="table table-bordered">
+        <table id="departmentTable" class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -22,62 +28,8 @@
                 </tr>
             </thead>
         </table>
-    </div>
-
-    @include('department.edit')
-
-    {{-- Themed --}}
-    <x-adminlte-modal id="modalPurple" title="Add Department" theme="purple" icon="fas fa-tag" size='md'>
-
-        <form id="addDepartmentForm" name="yes" method="POST">
-            <!-- CSRF Token -->
-            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-
-            <!-- Product Name Input -->
-            <div class="form-group">
-                <label for="product_name">Name</label>
-                <input
-                    value="@php
-if (isset($department)) {
-                        echo $department->name;
-                    } @endphp"
-                    type="text" id="name" name="name" class="form-control" placeholder="enter name" required>
-                <input
-                    value="@php
-if (isset($department)) {
-                        echo $department->id;
-                    } @endphp"
-                    type="hidden" id="id" name="id">
-
-                <!-- Employee Dropdown -->
-                <label class="mt-2">Assign Employee:</label>
-                <select id="employee_id" name="employee_id" class="form-control" required>
-                    <option value="">Select Employee</option>
-                    @foreach ($employees as $employee)
-                        <option value="{{ $employee->id }}">{{ $employee->name }} - {{ $employee->role }}</option>
-                    @endforeach
-                </select>
-
-                <!-- Description -->
-                <label class="mt-2">Description:</label>
-                <textarea id="description" name="description" class="form-control" rows="3"
-                    placeholder="Enter department description"></textarea>
-
-            </div>
-
-            <!-- Submit Button -->
-            <div class="form-group">
-                <button type="submit" onclick="submitDepartmentForm()" class="btn btn-success">
-                    <i class="fas fa-save"></i> Save
-                </button>
-            </div>
-        </form>
-        <x-slot name="footerSlot" :null="true">
-
-            <!-- This will effectively remove the footer section  -->
-
-        </x-slot>
-    </x-adminlte-modal>
+    </div>   
+    @include('department.create')
 @stop
 
 @section('css')
@@ -88,55 +40,41 @@ if (isset($department)) {
 @section('js')
     <script src="{{ asset('js/datatables.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#productTable').DataTable({
+            $('#modal_Purple').on('shown.bs.modal', function() {
+                $('#employee_id').select2();
+            });
+            $('#departmentTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('department.index') }}",
-                columns: [{
-                        data: "id",
-                        "render": function(data, type, row, meta) {
-                            return meta.row + 1; // Uses row index
-                        }
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'manager_name',
-                        name: 'manager_name'
-                    },
-                    {
-                        "data": "status",
-                        "render": function(data, type, row) {
-                            return data == 1 ? 'Active' : 'Inactive';
-                        }
-                    }, {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    }
+                columns: [
+                    { data: "id", "render": function(data, type, row, meta) { return meta.row + 1; } },
+                    { data: 'name', name: 'name' },
+                    { data: 'manager_name', name: 'manager_name' }, 
+                    { data: "status", "render": function(data, type, row) { return data == 1 ? 'Active' : 'Inactive'; } },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
                 ]
             });
         });
 
         $(document).on('click', '.edit-btn', function() {
-            let id = $(this).data('id');
             let url = $(this).data('url');
-
             $.ajax({
                 url: url,
                 type: "GET",
                 success: function(data) {
-                    console.log(data);
-                    $('#editModal').modal('show'); // Show modal
-                    $('#department_id').val(data.id); // Populate form fields
-                    $('#department_name').val(data.name);
-                    $('#employee_id').val(data.manager_id); 
-                    $('#productTable').DataTable().ajax.reload(); // Refresh DataTable
+                    $('#department_id').val(data.id); 
+                    $('#name').val(data.name);
+                    let managerIds = JSON.parse(data.manager_id); 
+                    $('#employee_id').val(managerIds).trigger('change'); 
+                    $('#employee_id').select2();
+                    $('#description').val(data.description);
+                    $('#modal_Purple .modal-title').text('Edit Department'); 
+                    $('#modal_Purple').modal('show');  
                 },
                 error: function() {
                     alert("Error fetching data.");
@@ -153,10 +91,12 @@ if (isset($department)) {
                     url: url,
                     type: "POST",
                     data: {
-                        _token: "{{ csrf_token() }}", // Include CSRF token for Laravel
+                        _token: "{{ csrf_token() }}",
+                        _method:"DELETE",
+                        id:id
                     },
                     success: function(response) {
-                        $('#productTable').DataTable().ajax.reload(); // Refresh DataTable
+                        $('#departmentTable').DataTable().ajax.reload(); 
                     },
                     error: function() {
                         alert("Error processing request.");
@@ -164,22 +104,58 @@ if (isset($department)) {
                 });
             }
         });
+        function showAddDepartmentModal() {
+            $('#modal_Purple').modal('show'); 
+            $('#department_id').val("");
+            $('#name').val("");
+            $('#employee_id').val("");
+            $('#employee_id').val(null).trigger('change');
+            $('#modal_Purple .modal-title').text('Add Department'); 
+        }
+        function submitDepartmentForm() {
+            let isSubmitting = false;
+            $('#addDepartmentForm').submit(function(e) {
+                e.preventDefault();
+                if (isSubmitting) return; 
+                isSubmitting = true;
+                let submitButton = $('#submitDep');
+                submitButton.prop('disabled', true);
+                submitButton.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
 
-
-
-        function submitProductForm() {
-            $('#addCustomerForm').submit(function(e) {
                 $.ajax({
                     url: "{{ route('department.store') }}",
                     type: "POST",
                     data: $(this).serialize(),
                     success: function(response) {
-                        $('#modalPurple').modal('hide'); // Hide modal
-                        $('#productTable').DataTable().ajax.reload(); // Refresh DataTable
-                        alert('Department added successfully!');
+                        if (response.success) {
+                            submitButton.prop('disabled', false);
+                            submitButton.html('Save Department');
+                            alert(response.msg);
+
+                            // Clear form fields
+                            $('#department_id').val(""); 
+                            $('#name').val("");
+                            $('#employee_id').val(""); 
+                            $('#description').val(""); 
+
+                            // Hide the modal
+                            $('#modal_Purple').modal('hide');
+
+                            // Reload DataTable
+                            $('#departmentTable').DataTable().ajax.reload();
+
+                            // Redirect after successful submission
+                            window.location.href = response.redirect_url;  // Redirect to department index page
+                        } else {
+                            submitButton.prop('disabled', false);
+                            submitButton.html('Save Department');
+                            alert(response.msg);
+                        }
                     },
-                    error: function(xhr) {
-                        alert('Error adding product.');
+                    error: function() {
+                        submitButton.prop('disabled', false);
+                        submitButton.html('Save Department');
+                        alert('Error adding department.');
                     }
                 });
             });

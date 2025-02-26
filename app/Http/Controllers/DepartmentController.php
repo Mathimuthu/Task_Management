@@ -128,7 +128,7 @@ class DepartmentController extends Controller
                     'status' => 1,
                     'manager_id' => $request->has('employee_id') ? json_encode(array_map('intval', $request->employee_id)) : json_encode([]),
                 ]);
-                if ($request->has('employee_id')) {
+                if ($request->has('employee_id') && !empty($request->employee_id)) {
                     $managerIds = array_unique(array_map('intval', $request->employee_id));
 
                     foreach ($managerIds as $managerId) {
@@ -136,10 +136,10 @@ class DepartmentController extends Controller
                         if ($user) {
                             $oldDepartmentId = $user->department_id;
 
-                            if ($oldDepartmentId) {
+                            if ($oldDepartmentId && $oldDepartmentId != $department->id) {
                                 $oldDepartment = Department::find($oldDepartmentId);
                                 if ($oldDepartment) {
-                                    $oldManagerIds = json_decode($oldDepartment->manager_id, true);
+                                    $oldManagerIds = json_decode($oldDepartment->manager_id, true) ?? [];
                                     $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
                                     $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
                                     $oldDepartment->save();

@@ -160,7 +160,7 @@
                     if (data.photo) {
                         $('#view_photo').attr('src', '{{ asset("") }}' + data.photo);
                     } else {
-                        $('#view_photo').attr('src', '/default-photo.jpg');
+                        $('#view_photo').attr('src', '{{asset("/images/default-user-logo.webp")}} ');
                     }
                     $('#viewUserModal').modal('show');  
                 },
@@ -186,6 +186,7 @@
                     $('#dob').val(data.dob);
                     $('#blood_group').val(data.blood_group);
                     $('#department_id').val(data.department_id).change();
+                    $('#role').val(data.role).change();
                     $('#submitButton').text("Update Employee");
                     if (data.photo) {
                         $('#photoPreview').attr('src', '{{ asset("") }}' + data.photo);

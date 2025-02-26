@@ -32,7 +32,8 @@ class User extends Authenticatable
         'address',
         'dob',
         'blood_group',
-        'photo'
+        'photo',
+        'created_by'
     ];
 
     /**

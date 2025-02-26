@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
@@ -155,7 +156,7 @@ class UserController extends Controller
                 $userData['role'] = $request->role;
                 $userData['registration_no'] = $request->registration_no;
                 $userData['department_id'] = $request->department_id;
-                $userData['created_by'] = \Illuminate\Support\Facades\Auth::user()->id;
+                $userData['created_by'] =  Auth::user()->id;
                 $userData['status'] = 1;
                 if ($request->hasFile('photo')) {
                     $photo = $request->file('photo');
@@ -184,7 +185,7 @@ class UserController extends Controller
                     return array('success' => 1, 'msg' => "Employee Updated Successfully");
                 } else {
                     $userData['password'] = bcrypt("12345678");
-                    User::create($userData);
+                    $user = User::create($userData);
                     if ($department) {
                         // Get current managers, add new user
                         $currentManagers = $department->manager_id ? json_decode($department->manager_id) : [];

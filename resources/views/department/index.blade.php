@@ -57,7 +57,10 @@
                     { data: 'manager_name', name: 'manager_name' }, 
                     { data: "status", "render": function(data, type, row) { return data == 1 ? 'Active' : 'Inactive'; } },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
-                ]
+                ],
+                language: {
+                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
+                }
             });
         });
 

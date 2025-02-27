@@ -117,7 +117,11 @@
                         orderable: false,
                         searchable: false
                     }
-                ]
+                ],
+                order: [[0, 'desc']],  
+                language: {
+                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
+                }
             });
         });
 
@@ -195,6 +199,7 @@
             $('#assign_date').val("");
             $('#deadline').val("");
             $('#department_id').val("").change();
+            $('#department_ids').val("").change();
             $('#employee_ids').val("").change();
             $('#submitButton').text("Add Task");
         }

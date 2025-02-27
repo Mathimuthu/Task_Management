@@ -364,7 +364,15 @@ class TaskController extends Controller
     {
         $task = Task::onlyTrashed()->findOrFail($id);
         $task->restore();
-
+        TaskDetail::create([
+            'task_id' => $task->id,
+            'meta_data' => json_encode([
+                'task_details' => [
+                    'task_module' => 'Task Restored',
+                    'updated_by' => auth()->user()->id
+                ]
+                ])
+        ]);     
         return response()->json(['success' => true, 'message' => 'Task restored successfully']);
     }
 }

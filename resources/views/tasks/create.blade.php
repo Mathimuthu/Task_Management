@@ -3,7 +3,7 @@
         @csrf
 
         <div class="form-group">
-            <label for="title" class="text-black">Title</label>
+            <label for="title" class="text-black">Title <span style="color: red;">*</span> </label>
             <div class="input-group">
                 <input type="hidden" id="task_id" name="task_id">
                 <input type="text" id="title" name="title" class="form-control" placeholder="Enter task title"
@@ -15,7 +15,7 @@
             <textarea id="description" name="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
         </div>
         <div class="form-group">
-            <label for="priority">Priority</label>
+            <label for="priority">Priority <span style="color: red;">*</span> </label>
             <select id="priority" name="priority" class="form-control" required>
                 <option value="Low">Low</option>
                 <option value="Medium" selected>Medium</option>
@@ -24,7 +24,7 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="employee_ids">Assigned Employees</label>
+            <label for="employee_ids">Assigned Employees <span style="color: red;">*</span> </label>
             <select id="employee_ids" name="employee_ids" class="form-control" required>
                 @php
                     foreach ($employees as $value) {
@@ -45,11 +45,11 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="assign_date">Assign Date</label>
+            <label for="assign_date">Assign Date <span style="color: red;">*</span> </label>
             <input type="date" id="assign_date" name="assign_date" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="deadline">Deadline</label>
+            <label for="deadline">Deadline <span style="color: red;">*</span> </label>
             <input type="date" id="deadline" name="deadline" class="form-control" required min="{{ \Carbon\Carbon::today()->toDateString() }}">
         </div>
         <div class="form-group" id="filePreview" style="display: none;">

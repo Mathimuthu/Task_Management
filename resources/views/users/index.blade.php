@@ -93,7 +93,10 @@
                     },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],
-                order: [[0, 'desc']]  // Set default order by the first column (id or created_at) descending
+                order: [[0, 'desc']],  
+                language: {
+                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
+                }
             });
         });
         $(document).on('click', '.updateStatusBtn', function() {

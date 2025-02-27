@@ -69,6 +69,11 @@
             padding: 5px;
         }
     }
+    @media (min-width: 768px) { /* Apply only to system view (larger screens) */
+    #productTable td:last-child {
+        padding: 10px 0px;
+    }
+}
 </style>
 
     <div>
@@ -105,13 +110,11 @@
 
 
 @section('css')
-    {{-- Add here extra stylesheets --}}
-    {{-- <link rel="stylesheet" href="/css/admin_custom.css"> --}}
+    <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
 @stop
 
 @section('js')
     <script src="{{ asset('js/datatables.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
     <script>
        $(document).ready(function() {
             $('#productTable').DataTable({

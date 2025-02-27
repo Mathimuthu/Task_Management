@@ -202,9 +202,11 @@
         $(document).on('click', '.updateStatusBtn', function() {
             let taskId = $(this).data("task-id");
             let url = $(this).data("url");
+            let description = $(this).data("description");
             let currentStatus = $(this).data("current-status");
             // Set values in the modal form
             $("#s_task_id").val(taskId);
+            $("#description").val(description);
             $("#u_status").val(currentStatus).change();
             $("#updateTaskForm").attr("action", url);
             $('#statusUpdateModal').modal('show');
@@ -215,13 +217,34 @@
 
             $('#addTaskForm').submit(function(e) {
                 e.preventDefault();
-                console.log('Form submitted once');
+
+                // Ensure that the form is not being submitted more than once
                 if (isSubmitting) return; 
                 isSubmitting = true;
+
+                // Disable the submit button and show loading state
                 let submitButton = $('#submitButton');
                 submitButton.prop('disabled', true);
                 submitButton.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
+
+                // Get the file from the form
+                var fileInput = $('#upload_task')[0]; // Assuming upload_task is the ID of the file input
+                var file = fileInput.files[0];
+                var maxSize = 40 * 1024 * 1024; // 40MB in bytes
+
+                // Check if the file size exceeds the maximum size
+                if (file && file.size > maxSize) {
+                    submitButton.prop('disabled', false);
+                    submitButton.html('Save Task');
+                    alert('File is too large. Maximum allowed size is 40MB.');
+                    isSubmitting = false;
+                    return;
+                }
+
+                // Create FormData object to send the form data, including files
                 var formData = new FormData(this); 
+
+                // Send the form data via AJAX
                 $.ajax({
                     url: "{{ route('tasks.store') }}",
                     type: "POST",
@@ -252,19 +275,18 @@
             });
         }
 
-
         $(document).on('click', '.viewTimelineBtn', function() {
             let taskId = $(this).data("task-id");
             let url = $(this).data("url");
 
-            $('#taskTimeline').html('<li>Loading...</li>'); // Show loading message
+            $('#taskTimeline').html('<li>Loading...</li>'); 
 
             $.ajax({
                 url: url,
                 type: "GET",
                 success: function(response) {
                     if (response.success) {
-                        $('#taskTimeline').html(response.html); // Insert generated HTML
+                        $('#taskTimeline').html(response.html); 
                     } else {
                         $('#taskTimeline').html('<li>No status updates available.</li>');
                     }
@@ -274,7 +296,7 @@
                 }
             });
 
-            $('#taskTimelineModal').modal('show'); // Open modal
+            $('#taskTimelineModal').modal('show'); 
         });
 
 

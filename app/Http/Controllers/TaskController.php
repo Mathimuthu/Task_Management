@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
@@ -53,7 +54,7 @@ class TaskController extends Controller
                                 </button>';
         
                 $updateButton = '<button data-url="' . route('tasks.update', ['task' => $task->id]) . '"  
-                                 class="ml-1 btn btn-sm btn-success updateStatusBtn" data-task-id="' . $task->id . '" data-current-status="' . $task->status . '" title="Update Status">
+                                 class="ml-1 btn btn-sm btn-success updateStatusBtn" data-task-id="' . $task->id . '" data-description="'. $task->description .'" data-current-status="' . $task->status . '" title="Update Status">
                                  <i class="fas fa-sync-alt"></i>
                               </button>';
         
@@ -145,10 +146,23 @@ class TaskController extends Controller
             ];
             if ($request->hasFile('upload_task')) {
                 $uploadTask = $request->file('upload_task');
-                $filename = time() . '.' . $uploadTask->getClientOriginalExtension();
-                $uploadTask->move(public_path('upload_tasks'), $filename); 
-                $taskData['upload_task'] = 'upload_tasks/' . $filename; 
-            }    
+                $maxSize = 41943040; 
+                $allowedExtensions = ['pdf', 'docx'];
+                $fileExtension = $uploadTask->getClientOriginalExtension();
+                $fileSize = $uploadTask->getSize();
+            
+                if ($fileSize > $maxSize) {
+                    return response()->json(['error' => 'File is too large. Maximum allowed size is 40MB.'], 400);
+                }
+            
+                if (in_array($fileExtension, $allowedExtensions)) {
+                    $filename = time() . '.' . $fileExtension;
+                    $uploadTask->move(public_path('upload_tasks'), $filename);
+                    $taskData['upload_task'] = 'upload_tasks/' . $filename;
+                } else {
+                    return response()->json(['error' => 'Invalid file type. Only PDF and DOCX are allowed.'], 400);
+                }
+            }            
             if ($request->has('task_id') && !empty($request->task_id)) {
                 $task = Task::find($request->task_id);
                 if ($task) {
@@ -157,7 +171,7 @@ class TaskController extends Controller
                         'task_id' => $task->id,
                         'meta_data' => json_encode([
                             'task_details' => [
-                                'task_module' => 'task_updated',
+                                'task_module' => 'Task Updated',
                                 'title' => $request->title,
                                 'description' => $request->description,
                                 'priority' => $request->priority,
@@ -169,7 +183,7 @@ class TaskController extends Controller
                                 'status' => $request->status,
                                 'updated_by' => auth()->user()->id
                             ]
-                        ])
+                            ])
                     ]);
                 }
                 return response()->json(['success' => 1, 'msg' => "Task Updated Successfully"]);
@@ -179,7 +193,7 @@ class TaskController extends Controller
                     'task_id' => $task->id,
                     'meta_data' => json_encode([
                         'task_details' => [
-                            'task_module' => 'task_created',
+                            'task_module' => 'Task Created',
                             'title' => $request->title,
                             'description' => $request->description,
                             'priority' => $request->priority,
@@ -191,7 +205,7 @@ class TaskController extends Controller
                             'status' => $request->status,
                             'updated_by' => auth()->user()->id
                         ]
-                    ])
+                        ])
                 ]);                
                 return response()->json([
                     'success' => 1,
@@ -244,17 +258,16 @@ class TaskController extends Controller
             'status' => $request->status,
             'description' => $request->description
         ]);
-        // Update or Insert in task_details
         TaskDetail::create([
             'task_id' => $task->id,
             'meta_data' => json_encode([
                 'task_details' => [
-                    'task_module' => 'taskstatus_updated',
-                    'task_status' => $request->status,
+                    'task_module' => 'Change Status',
+                    'status' => $request->status,
                     'description' => $request->description,
-                    'updated_by' => auth()->user()->id
+                    'updated_by' => auth()->user()->id,
                 ]
-            ])
+            ]),                
         ]);        
 
         return ['success' => 1, 'msg' => "Task Updated Successfully"];
@@ -270,53 +283,83 @@ class TaskController extends Controller
         TaskDetail::create([
             'task_id' => $task->id,
             'meta_data' => json_encode([
-                'task_module' => 'task_deleted',
-                'updated_by' => auth()->user()->id
-            ])
+                'task_details' => [
+                    'task_module' => 'Task Deleted',
+                    'updated_by' => auth()->user()->id
+                ]
+                ])
         ]);        
         return redirect()->back()->with('success', 'Task deleted successfully');
     }
 
     public function getTaskTimeline($taskId)
     {
-        // Fetch status updates from TaskDetail table
-        $taskDetail = TaskDetail::where('task_id', $taskId)
-            ->orderBy('updated_at', 'ASC') // Order by earliest first
+        // Fetch task details from the database
+        $taskDetails = TaskDetail::where('task_id', $taskId)
+            ->orderBy('updated_at', 'ASC')
             ->get();
-
-        if ($taskDetail->isEmpty()) {
-            return response()->json(['success' => false, 'html' => '<li>No status updates available.</li>']);
+    
+        if ($taskDetails->isEmpty()) {
+            return response()->json([
+                'success' => false, 
+                'html' => '<li>No status updates available.</li>'
+            ]);
         }
-
-        // Status mapping
-        $statusMap = [
-            'pending_date' => 'Pending',
-            'inprogress_date' => 'In Progress',
-            'completed_date' => 'Completed',
-            'cancelled_date' => 'Cancelled'
-        ];
-
-        // Build the timeline HTML
-        $timelineHtml = '<ul class="timeline-list">';
-
-        foreach ($taskDetail as $detail) {
-            // Iterate over each status and check if a date exists
-            foreach ($statusMap as $dateField => $status) {
-                if (!empty($detail->$dateField)) { // Only show statuses with valid dates
-                    $timelineHtml .= '
-                <li class="timeline-item">
-                    <span class="status-date">' . date('Y-m-d H:i:s', strtotime($detail->$dateField)) . '</span>
-                    <div class="status-desc"><strong>' . ucfirst($status) . '</strong></div>
-                    <div>' . (!empty($detail->description) ? htmlspecialchars($detail->description, ENT_QUOTES, 'UTF-8') : 'No description') . '</div>
-                </li>';
-                }
+    
+        // Start constructing the HTML content for the timeline
+        $timelineHtml = '';
+    
+        foreach ($taskDetails as $detail) {
+            // Decode the meta data to extract task details
+            $metaData = json_decode($detail->meta_data, true);
+            $taskDetails = $metaData['task_details'] ?? [];
+    
+            // Build the timeline item for each task update
+            $timelineHtml .= '<li class="timeline-item">';
+            $timelineHtml .= '<div class="timeline-icon bg-info status-date"><i class="fas fa-history"></i> ' . $detail->updated_at->format('d-m-Y H:i:s') . ' </div>';
+            $timelineHtml .= '<div class="timeline-content">';
+            // $timelineHtml .= '<div class="timeline-header">';
+            // $timelineHtml .= '<span class="status-date">' . $detail->updated_at->format('Y-m-d H:i:s') . '</span>';
+            // $timelineHtml .= '<div class="task-user">';
+            // $timelineHtml .= '<span class="user-name">' . (User::find($taskDetails['updated_by']) ? User::find($taskDetails['updated_by'])->name : 'Unknown') . '</span>';
+            // $timelineHtml .= '</div></div>';
+    
+            $timelineHtml .= '<div class="timeline-body">';
+            if (isset($taskDetails['updated_by'])) {
+                $timelineHtml .= '<p><strong>Updated By:</strong> ' . (User::find($taskDetails['updated_by']) ? User::find($taskDetails['updated_by'])->name : 'Unknown') . '</p>';
             }
+            if (isset($taskDetails['task_module'])) {
+                $timelineHtml .= '<p><strong>Task Module:</strong> ' . $taskDetails['task_module'] . '</p>';
+            }
+            if (isset($taskDetails['title'])) {
+                $timelineHtml .= '<p><strong>Title:</strong> ' . $taskDetails['title'] . '</p>';
+            }
+            if (isset($taskDetails['status'])) {
+                $timelineHtml .= '<p><strong>Status:</strong> ' . $taskDetails['status'] . '</p>';
+            }
+            if (isset($taskDetails['description'])) {
+                $timelineHtml .= '<p><strong>Description:</strong> ' . $taskDetails['description'] . '</p>';
+            }
+            if (isset($taskDetails['priority'])) {
+                $timelineHtml .= '<p><strong>Priority:</strong> ' . $taskDetails['priority'] . '</p>';
+            }
+            if (isset($taskDetails['department_id'])) {
+                $department = Department::find($taskDetails['department_id']);
+                $timelineHtml .= '<p><strong>Department:</strong> ' . ($department ? $department->name : 'N/A') . '</p>';
+            }
+            if (isset($taskDetails['employee_ids'])) {
+                $employees = User::whereIn('id', explode(',', $taskDetails['employee_ids']))->pluck('name')->toArray();
+                $timelineHtml .= '<p><strong>Assigned Employee(s):</strong> ' . implode(', ', $employees) . '</p>';
+            }
+            $timelineHtml .= '</div></div></li>';
         }
-
-        $timelineHtml .= '</ul>';
-
-        return response()->json(['success' => true, 'html' => $timelineHtml]);
+    
+        return response()->json([
+            'success' => true,
+            'html' => $timelineHtml
+        ]);
     }
+    
     public function restore($id)
     {
         $task = Task::onlyTrashed()->findOrFail($id);

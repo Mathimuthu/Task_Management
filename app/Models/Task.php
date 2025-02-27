@@ -21,7 +21,8 @@ class Task extends Model
         'role_id',
         'employee_ids',
         'status',
-        'upload_task'
+        'upload_task',
+        'updated_by'
     ];
 
     protected $casts = [

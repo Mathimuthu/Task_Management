@@ -4,6 +4,7 @@
 /public/hot
 /public/storage
 /public/employee
+/public/upload_tasks
 /storage/*.key
 /storage/pail
 /vendor

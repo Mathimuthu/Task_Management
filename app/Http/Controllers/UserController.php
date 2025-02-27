@@ -53,50 +53,56 @@ class UserController extends Controller
             $users = $usersQuery->get();
 
             return DataTables::of($users)
-                ->addColumn('action', function ($product) {
-                    $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>';   
-                    $updateButton = '<button data-url="' . route('users.update', ['user' => $product->id]) . '"  
-                                    class="ml-1 btn btn-sm btn-success updateStatusBtn" data-users-id="' . $product->id . '" data-current-status="' . $product->status . '" title="Change Status">
-                                    <i class="fas fa-sync-alt"></i>
+            ->addColumn('action', function ($product) {
+                $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>';   
+                $updateButton = '<button data-url="' . route('users.update', ['user' => $product->id]) . '"  
+                                class="ml-1 btn btn-sm btn-success updateStatusBtn" data-users-id="' . $product->id . '" data-current-status="' . $product->status . '" title="Change Status">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>';
+                $viewButton = '<button class="ml-1 btn btn-sm btn-secondary view-btn" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>';
+                $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>';
-                    $viewButton = '<button class="ml-1 btn btn-sm btn-secondary view-btn" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>';
-                    $restoreButton = null;
-                    if ($product->deleted_at) {
-                        if (auth()->user()->hasRole(1)) {
-                            $restoreButton = '<button class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
-                                                <i class="fas fa-undo"></i>
-                                            </button>';
-                        return $viewButton . $restoreButton;
-                        }
-                    }
-
-                    if (!$product->deleted_at) {
-                        $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>';
-                    }
-
-                    $returnData = "";
-                    if ($this->checkPermissionBasedRole('write users')) {
-                        $returnData .= $editButton . $updateButton;
-                    }
-                    if ($this->checkPermissionBasedRole('delete users') && !$product->deleted_at ) {
-                        $returnData .= $deleteButton;
-                    }
-                    if ($this->checkPermissionBasedRole('read users')) {
-                        $returnData .= $viewButton;
-                    }
-                    if ($restoreButton) {
-                        $returnData .= $restoreButton;
-                    }
-                    return $returnData;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+        
+                $restoreButton = "";
+                if ($product->deleted_at && auth()->user()->hasRole(1)) {
+                    $restoreButton = '<button class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
+                                    </button>';
+                }
+            
+                // Mobile View: Three-dot menu (⋯) with only text options
+                $mobileMenu = '<div class="dropdown d-block d-sm-none">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton-' . $product->id . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    ⋯
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton-' . $product->id . '">';
+                
+                if ($this->checkPermissionBasedRole('write users')) {
+                    $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('users.edit', $product->id) . '">Edit</a>';
+                    $mobileMenu .= '<a class="dropdown-item updateStatusBtn" href="#" data-url="' . route('users.update', ['user' => $product->id]) . '" data-users-id="' . $product->id . '" data-current-status="' . $product->status . '">Change Status</a>';
+                }
+                if ($this->checkPermissionBasedRole('delete users') && !$product->deleted_at) {
+                    $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '">Delete</a>';
+                }
+                if ($this->checkPermissionBasedRole('read users')) {
+                    $mobileMenu .= '<a class="dropdown-item view-btn" href="#" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '">View</a>';
+                }
+                if ($restoreButton) {
+                    $mobileMenu .= '<a class="dropdown-item restore-btn" href="#" data-url="' . route('users.restore', $product->id) . '">Restore</a>';
+                }
+                $mobileMenu .= '</div></div>';
+        
+                // Desktop View: Full buttons (TEXT ONLY, NO ICONS)
+                $desktopMenu = '<div class="d-none d-sm-block">' . $editButton . $updateButton . $deleteButton . $viewButton . $restoreButton . '</div>';
+        
+                return $desktopMenu . $mobileMenu;
+            })            
+            ->rawColumns(['action'])
+            ->make(true);        
         }
 
         $departments = Department::select("*")->where('status', 1)->get();

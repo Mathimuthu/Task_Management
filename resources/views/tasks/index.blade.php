@@ -3,6 +3,86 @@
 @section('title', 'Task Management')
 
 @section('content')
+<style>
+    /* Prevent icons from getting too big on smaller screens */
+@media (max-width: 767px) {
+    .fa, .btn i { /* Target Font Awesome icons and icons inside buttons */
+        font-size: 14px; /* Set a smaller font size for icons */
+    }
+
+    /* Optional: Further size adjustments for mobile view */
+    .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Smaller button icons */
+    .btn i {
+        font-size: 16px;
+        margin-right: 5px; /* Keep a small margin */
+    }
+}
+
+/* Adjust for very small screens (portrait mode on mobile) */
+@media (max-width: 480px) {
+    .fa, .btn i {
+        font-size: 12px; /* Even smaller icons on very small screens */
+    }
+}
+/* Make the table horizontally scrollable */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+}
+
+/* Adjust label widths for small screens */
+@media (max-width: 767px) {
+    .user-info {
+        font-size: 12px;
+    }
+
+    .label {
+        width: auto; /* Allow labels to adjust width */
+    }
+
+    /* Adjust modal content for small screens */
+    .modal-content {
+        width: 90%;
+    }
+
+    /* Stack the buttons vertically in smaller screens */
+    .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Style for buttons on mobile devices */
+    .btn {
+        font-size: 12px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Make the table smaller and more compact */
+    .table th, .table td {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+/* Adjust for very small screens (portrait mode on mobile) */
+@media (max-width: 480px) {
+    .d-flex {
+        flex-direction: column;
+    }
+
+    .table th, .table td {
+        font-size: 10px;
+        padding: 5px;
+    }
+}
+</style>
     <div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Task List</h2>
@@ -63,6 +143,13 @@
                     });
                 }
             });
+            $(window).resize(function() {
+                if ($(window).width() <= 767) {
+                    $(".table").addClass("table-responsive");
+                } else {
+                    $(".table").removeClass("table-responsive");
+                }
+            }).trigger('resize');
         });
         $(document).ready(function() {
             $('#taskTable').DataTable({
@@ -145,11 +232,9 @@
                     if (data.upload_task) {
                         let fileExtension = data.upload_task.split('.').pop().toLowerCase();
                         if (fileExtension === 'pdf') {
-                            // If the file is a PDF, show it in an iframe
                             $('#filePreview').html('<iframe src="{{ asset('') }}' + data.upload_task + '" width="100%" height="400px"></iframe>');
                             $('#filePreview').show();
                         } else if (fileExtension === 'docx') {
-                            // If the file is DOCX, show a download link or convert it
                             $('#filePreview').html('<a href="{{ asset('') }}' + data.upload_task + '" target="_blank">Download DOCX</a>');
                             $('#filePreview').show();
                         } else {

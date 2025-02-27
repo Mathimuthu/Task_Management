@@ -20,25 +20,43 @@ class DepartmentController extends Controller
                 ->leftJoin('users', 'users.id', '=', 'departments.manager_id')
                 ->get();
     
-            return DataTables::of($products)
+                return DataTables::of($products)
                 ->addColumn('action', function ($product) {
                     $editButton = '<button data-url="' . route('department.edit', $product->id) . '" data-id="' . $product->id . '" data-toggle="modal" data-target="#modalPurple" class="mr-2 btn btn-sm btn-primary edit-btn" title="Edit">
                                         <i class="fas fa-edit"></i>
-                                </button>';
-
+                                    </button>';
+            
                     $deleteButton = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('department.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>';
+            
                     $returnData = "";
-    
+            
                     if ($this->checkPermissionBasedRole('write department')) {
                         $returnData = $editButton;
                     }
                     if ($this->checkPermissionBasedRole('delete department')) {
-                        $returnData = $returnData . $deleteButton;
+                        $returnData .= $deleteButton;
                     }
-    
-                    return $returnData;
+            
+                    // Full buttons for desktop view (hidden on small screens)
+                    $desktopMenu = '<div class="d-none d-sm-block">' . $returnData . '</div>';
+            
+                    // Burger menu for mobile view (visible only on small screens)
+                    $mobileMenu = '<div class="dropdown d-block d-sm-none">
+                                    <button class="btn btn-sm" type="button" id="dropdownMenuButton-' . $product->id . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-h"></i> 
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton-' . $product->id . '">';
+                    if ($this->checkPermissionBasedRole('write department')) {
+                        $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('department.edit', $product->id) . '" data-id="' . $product->id . '" data-toggle="modal" data-target="#modalPurple">Edit</a>';
+                    }
+                    if ($this->checkPermissionBasedRole('delete department')) {
+                        $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('department.destroy', $product->id) . '" data-id="' . $product->id . '">Delete</a>';
+                    }
+                    $mobileMenu .= '</div></div>';
+            
+                    return $desktopMenu . $mobileMenu;
                 })
                 ->addColumn('manager_name', function ($product) {
                     // Check if manager_id is not null or empty
@@ -51,7 +69,7 @@ class DepartmentController extends Controller
                     }
                 })
                 ->rawColumns(['action'])
-                ->make(true);
+                ->make(true);            
         }
     
         $employees = User::where('status', 1)->where('role', 2)->get();

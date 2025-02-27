@@ -23,6 +23,52 @@
     .user-info span {
         white-space: nowrap; /* Prevent text from wrapping */
     }
+    /* Make the table horizontally scrollable */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+    }
+
+    /* Adjust label widths for small screens */
+    @media (max-width: 767px) {
+        .user-info {
+            font-size: 12px;
+        }
+
+        .label {
+            width: auto; /* Allow labels to adjust width */
+        }
+
+        /* Adjust modal content for small screens */
+        .modal-content {
+            width: 90%;
+        }
+
+        /* Stack the buttons vertically in smaller screens */
+        .d-flex {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        /* Make the table smaller and more compact */
+        .table th, .table td {
+            font-size: 12px;
+            padding: 8px;
+        }
+    }
+
+    /* Adjust for very small screens (portrait mode on mobile) */
+    @media (max-width: 480px) {
+        .d-flex {
+            flex-direction: column;
+        }
+
+        .table th, .table td {
+            font-size: 10px;
+            padding: 5px;
+        }
+    }
 </style>
 
     <div>
@@ -98,6 +144,13 @@
                     lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
                 }
             });
+            $(window).resize(function() {
+                if ($(window).width() <= 767) {
+                    $(".table").addClass("table-responsive");
+                } else {
+                    $(".table").removeClass("table-responsive");
+                }
+            }).trigger('resize');
         });
         $(document).on('click', '.updateStatusBtn', function() {
             let taskId = $(this).data("users-id");

@@ -316,7 +316,7 @@ class TaskController extends Controller
     
             // Build the timeline item for each task update
             $timelineHtml .= '<li class="timeline-item">';
-            $timelineHtml .= '<div class="timeline-icon bg-info status-date"><i class="fas fa-history"></i> ' . $detail->updated_at->format('d-m-Y H:i:s') . ' </div>';
+            $timelineHtml .= '<div class="timeline-icon  status-date"> ' . $detail->updated_at->format('d-m-Y H:i:s') . ' </div>';
             $timelineHtml .= '<div class="timeline-content">';
             // $timelineHtml .= '<div class="timeline-header">';
             // $timelineHtml .= '<span class="status-date">' . $detail->updated_at->format('Y-m-d H:i:s') . '</span>';

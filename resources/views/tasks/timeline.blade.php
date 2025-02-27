@@ -22,7 +22,7 @@
     content: '';
     position: absolute;
     left: 10px;
-    top: 5px;
+    top: 7px;
     width: 12px;
     height: 12px;
     background: #6a0dad;
@@ -31,8 +31,8 @@
 }
 
 .status-date {
-    font-size: 16px;
-    color: gray;
+    font-size: 17px;
+    color: #6a0dad;
 }
 
 .status-desc {

@@ -330,6 +330,11 @@ return [
             'icon' => 'fas fa-fw fa-tasks',
         ],
         [
+            'text' => 'My Tasks',
+            'url' => 'mytasks',
+            'icon' => 'fas fa-fw fa-clipboard-list',
+        ],
+        [
             'text' => 'Roles',
             'url' => 'role',
             'icon' => 'fas fa-fw fa-users',

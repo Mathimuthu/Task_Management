@@ -25,6 +25,7 @@
         </div>
         <div class="form-group">
             <label for="employee_ids">Assigned Employees <span style="color: red;">*</span> </label>
+            <input type="hidden" name="employee_ids" id="employe">
             <select id="employee_ids" name="employee_ids" class="form-control" required>
                 @php
                     foreach ($employees as $value) {

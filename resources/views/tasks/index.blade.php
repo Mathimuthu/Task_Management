@@ -82,6 +82,22 @@
         padding: 5px;
     }
 }
+/* Ensure selected option is always visible in mobile view */
+@media (max-width: 767px) {
+    select.form-control {
+        -webkit-appearance: none; /* Hide default styling */
+        -moz-appearance: none;
+        appearance: none;
+        background-color: white;
+        padding-right: 20px; /* Space for dropdown arrow */
+    }
+
+    .status-dropdown {
+        min-width: 100px; /* Prevent shrinking too much */
+        text-align: center; /* Center text */
+    }
+}
+
 </style>
     <div>
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -122,6 +138,7 @@
 
 @section('js')
     <script src="{{ asset('js/datatables.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             $('#employee_ids').on('change', function() {
@@ -192,10 +209,22 @@
                     },
                     {
                         data: "status",
-                        "render": function(data) {
-                            return data == "Completed" ?
-                                '<span class="text-success">Completed</span>' :
-                                '<span class="text-warning">' + data + '</span>';
+                        name: "status",
+                        orderable: false,
+                        searchable: true,
+                        render: function(data, type, row) {
+                            let statusOptions = ["Pending", "In Progress", "Completed", "Cancelled"];
+                            let selectedStatus = data || "Pending"; // Default to Pending if data is null
+
+                            let optionsHtml = statusOptions.map(status => 
+                                `<option value="${status}" ${selectedStatus === status ? "selected" : ""}>${status}</option>`
+                            ).join("");
+
+                            return `
+                                <select class="form-control form-control-sm status-dropdown" data-id="${row.id}">
+                                    ${optionsHtml}
+                                </select>
+                            `;
                         }
                     },
                     {
@@ -207,11 +236,52 @@
                 ],
                 order: [[0, 'desc']],  
                 language: {
-                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
+                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries Per Page',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ Entries' 
                 }
             });
         });
-
+        $(document).on("change", ".status-dropdown", function() {
+            let taskId = $(this).data("id");
+            let newStatus = $(this).val();
+            
+            Swal.fire({
+                title: "Confirm Status Change",
+                text: `Are you sure you want to change the status to "${newStatus}"?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                cancelButtonText: "No"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/tasks/" + taskId,
+                        type: "PUT",
+                        data: {
+                            status: newStatus,
+                            _token: $('meta[name="csrf-token"]').attr('content') // Ensure CSRF token is included
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Success",
+                                text: "Task status updated successfully!",
+                                icon: "success"
+                            });
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: "Error",
+                                text: "Failed to update task status.",
+                                icon: "error"
+                            });
+                        }
+                    });
+                } else {
+                    swal.close();
+                    $('#taskTable').DataTable().ajax.reload();
+                }
+            });
+        });
         // Handle Edit Button Click
         $(document).on('click', '.edit-btn', function() {
             let url = $(this).data('url');
@@ -286,21 +356,22 @@
             $('#department_id').val("").change();
             $('#department_ids').val("").change();
             $('#employee_ids').val("").change();
+            $('#employe').prop('disabled', true);
             $('#submitButton').text("Add Task");
         }
 
-        $(document).on('click', '.updateStatusBtn', function() {
-            let taskId = $(this).data("task-id");
-            let url = $(this).data("url");
-            let description = $(this).data("description");
-            let currentStatus = $(this).data("current-status");
-            // Set values in the modal form
-            $("#s_task_id").val(taskId);
-            $("#description").val(description);
-            $("#u_status").val(currentStatus).change();
-            $("#updateTaskForm").attr("action", url);
-            $('#statusUpdateModal').modal('show');
-        });
+        // $(document).on('click', '.updateStatusBtn', function() {
+        //     let taskId = $(this).data("task-id");
+        //     let url = $(this).data("url");
+        //     let description = $(this).data("description");
+        //     let currentStatus = $(this).data("current-status");
+        //     // Set values in the modal form
+        //     $("#s_task_id").val(taskId);
+        //     $("#description").val(description);
+        //     $("#u_status").val(currentStatus).change();
+        //     $("#updateTaskForm").attr("action", url);
+        //     $('#statusUpdateModal').modal('show');
+        // });
 
         function submitTaskForm() {
             let isSubmitting = false;

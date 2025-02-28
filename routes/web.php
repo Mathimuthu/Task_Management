@@ -21,6 +21,7 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
     Route::get('/', function () {
         return view('home');
     });
+    Route::get('mytasks', [TaskController::class, 'mytasks'])->name('mytasks');
     Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('users', UserController::class);
     Route::resource('role', RoleController::class);

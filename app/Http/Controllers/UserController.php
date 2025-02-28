@@ -53,24 +53,24 @@ class UserController extends Controller
             $users = $usersQuery->get();
 
             return DataTables::of($users)
+            ->addColumn('status', function ($user) {
+                return $user->status ? 1 : 0; // Ensure status is 1 for active
+            })     
             ->addColumn('action', function ($product) {
-                $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>';   
-                $updateButton = '<button data-url="' . route('users.update', ['user' => $product->id]) . '"  
-                                class="ml-1 btn btn-sm btn-success updateStatusBtn" data-users-id="' . $product->id . '" data-current-status="' . $product->status . '" title="Change Status">
-                                <i class="fas fa-sync-alt"></i>
+                $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm edit-btn" title="Edit">
+                                <i class="fas fa-edit" style="color:#293fa4"></i>
                             </button>';
-                $viewButton = '<button class="ml-1 btn btn-sm btn-secondary view-btn" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '" title="View">
-                                <i class="fas fa-eye"></i>
+                $viewButton = '<button class="ml-1 btn btn-sm view-btn" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '" title="View">
+                                <i class="fas fa-eye" style="color:#0a94cd"></i>
                             </button>';
-                $deleteButton = '<button class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
+                $deleteButton = '<button class="ml-1 btn btn-sm delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
+                                    <i class="fas fa-trash-alt" style="color:red"></i>
                                 </button>';
         
                 $restoreButton = "";
                 if ($product->deleted_at && auth()->user()->hasRole(1)) {
-                    $restoreButton = '<button class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
+                    $restoreButton = '<button class="ml-1 btn btn-sm restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
+                                        <i class="fas fa-undo" style="color:grey"></i> 
                                     </button>';
                 }
             
@@ -83,7 +83,6 @@ class UserController extends Controller
                 
                 if ($this->checkPermissionBasedRole('write users')) {
                     $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('users.edit', $product->id) . '">Edit</a>';
-                    $mobileMenu .= '<a class="dropdown-item updateStatusBtn" href="#" data-url="' . route('users.update', ['user' => $product->id]) . '" data-users-id="' . $product->id . '" data-current-status="' . $product->status . '">Change Status</a>';
                 }
                 if ($this->checkPermissionBasedRole('delete users') && !$product->deleted_at) {
                     $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '">Delete</a>';
@@ -97,11 +96,11 @@ class UserController extends Controller
                 $mobileMenu .= '</div></div>';
         
                 // Desktop View: Full buttons (TEXT ONLY, NO ICONS)
-                $desktopMenu = '<div class="d-none d-sm-block">' . $editButton . $updateButton . $deleteButton . $viewButton . $restoreButton . '</div>';
+                $desktopMenu = '<div class="d-none d-sm-block">' . $editButton  . $deleteButton . $viewButton . $restoreButton . '</div>';
         
                 return $desktopMenu . $mobileMenu;
             })            
-            ->rawColumns(['action'])
+            ->rawColumns(['status','action'])
             ->make(true);        
         }
 
@@ -269,20 +268,20 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'status' => 'required',
         ]);
-
-        // Find the task by ID
-        $user = user::findOrFail($id);
-
-        $user->update([
-            'status' => $request->status,
-        ]);
-        return redirect()->back()->with('success', 'user status updated successfully!');
-    }
+    
+        // Find the user by ID
+        $user = User::findOrFail($id);
+    
+        // Update status
+        $user->update(['status' => $request->status]);
+    
+        return response()->json(['message' => 'User status updated successfully!']);
+    }    
 
     /**
      * Remove the specified resource from storage.

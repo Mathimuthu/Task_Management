@@ -113,7 +113,8 @@
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],
                 language: {
-                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
+                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries Per Page',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ Entries' 
                 }
             });
             $(window).resize(function() {

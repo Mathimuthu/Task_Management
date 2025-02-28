@@ -74,6 +74,52 @@
         padding: 10px 0px;
     }
 }
+/* Toggle Switch Styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
 </style>
 
     <div>
@@ -114,39 +160,95 @@
 @stop
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('js/datatables.min.js') }}"></script>
     <script>
-       $(document).ready(function() {
-            $('#productTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('users.index') }}",
-                columns: [
-                    { 
-                        data: "id", 
-                        "render": function(data, type, row, meta) {
-                            return meta.row + 1; // Row index
-                        }
+    $(document).ready(function() {
+        $('#productTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('users.index') }}",
+            columns: [
+                { 
+                    data: "id", 
+                    "render": function(data, type, row, meta) {
+                        return meta.row + 1; // Row index
+                    }
+                },
+                { data: 'name', name: 'name' },
+                { data: 'registration_no', name: 'registration_no' },
+                { data: 'mobile', name: 'mobile' },
+                { data: 'email', name: 'email' },
+                { data: 'department_names', name: 'department_names' },
+                { data: 'role_name', name: 'role_name' },
+                {
+                    data: "status", 
+                    name: "status",
+                    orderable: false,
+                    searchable: true,
+                    "render": function(data, type, row) {
+                        let checked = data == 1 ? 'checked' : ''; // Ensure 1 means active
+                        let titleText = data == 1 ? 'Active' : 'Inactive'; // Set title
+                        return `
+                            <label class="switch" title="${titleText}">
+                                <input type="checkbox" class="toggle-status" data-id="${row.id}" ${checked}>
+                                <span class="slider round"></span>
+                            </label>
+                        `;
+                    }
+                },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            order: [[0, 'desc']],  
+            language: {
+                lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries Per Page',
+                info: 'Showing _START_ to _END_ of _TOTAL_ Entries'
+            }
+        });
+    });
+    $(document).on('change', '.toggle-status', function() {
+        let userId = $(this).data('id');
+        let isChecked = $(this).prop('checked');
+        let newStatus = isChecked ? 1 : 0;
+        let confirmText = newStatus 
+            ? "Do you want to activate this user?" 
+            : "Do you want to deactivate this user?";
+
+        Swal.fire({
+            title: "Confirm Status Change",
+            text: confirmText,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes",
+            cancelButtonText: "No",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/users/" + userId,  // ✅ Pass ID in URL
+                    type: "PUT",  // ✅ Use PUT for updates
+                    data: { status: newStatus, _token: "{{ csrf_token() }}" },
+                    success: function(response) {
+                        Swal.fire({
+                            title: "Success",
+                            text: response.message,
+                            icon: "success"
+                        });
                     },
-                    { data: 'name', name: 'name' },
-                    { data: 'registration_no', name: 'registration_no' },
-                    { data: 'mobile', name: 'mobile' },
-                    { data: 'email', name: 'email' },
-                    { data: 'department_names', name: 'department_names' },
-                    { data: 'role_name', name: 'role_name' },
-                    { 
-                        data: "status", 
-                        "render": function(data, type, row) {
-                            return data == 1 ? 'Active' : 'Inactive';
-                        }
-                    },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
-                ],
-                order: [[0, 'desc']],  
-                language: {
-                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries per page' 
-                }
-            });
+                    error: function(xhr) {
+                        Swal.fire({
+                            title: "Error",
+                            text: "Something went wrong!",
+                            icon: "error"
+                        });
+                        // Revert toggle switch if error occurs
+                        $(this).prop('checked', !isChecked);
+                    }
+                });
+            } else {
+                // Revert toggle switch state if user cancels
+                $(this).prop('checked', !isChecked);
+            }
+        });
             $(window).resize(function() {
                 if ($(window).width() <= 767) {
                     $(".table").addClass("table-responsive");
@@ -155,16 +257,16 @@
                 }
             }).trigger('resize');
         });
-        $(document).on('click', '.updateStatusBtn', function() {
-            let taskId = $(this).data("users-id");
-            let url = $(this).data("url");
-            let currentStatus = $(this).data("current-status");
-            // Set values in the modal form
-            $("#s_user_id").val(taskId);
-            $("#u_status").val(currentStatus).change();
-            $("#updateUserForm").attr("action", url);
-            $('#statusUpdateModal').modal('show');
-        });
+        // $(document).on('click', '.updateStatusBtn', function() {
+        //     let taskId = $(this).data("users-id");
+        //     let url = $(this).data("url");
+        //     let currentStatus = $(this).data("current-status");
+        //     // Set values in the modal form
+        //     $("#s_user_id").val(taskId);
+        //     $("#u_status").val(currentStatus).change();
+        //     $("#updateUserForm").attr("action", url);
+        //     $('#statusUpdateModal').modal('show');
+        // });
         
         function submituserStatusForm() {
             $('#updateUserForm').submit(function(e) {

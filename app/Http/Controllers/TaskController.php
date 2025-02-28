@@ -27,40 +27,34 @@ class TaskController extends Controller
                             'users1.name as username', 'users2.name as updatedby')
                 ->leftJoin('departments', 'tasks.department_id', '=', 'departments.id')
                 ->leftJoin('users as users1', 'tasks.employee_ids', '=', 'users1.id') 
-                ->leftJoin('users as users2', 'tasks.updated_by', '=', 'users2.id'); 
+                ->leftJoin('users as users2', 'tasks.updated_by', '=', 'users2.id')
+                ->where('tasks.employee_ids', '!=', auth()->id()); 
             if (auth()->user()->hasRole(1)) {
                 $tasksQuery = $tasksQuery->withTrashed();
             }
-            $tasks = $tasksQuery->get();
-    
-            if (!auth()->user()->isAdmin()) {
-                $tasks = $tasks->whereIn('id', [auth()->user()->id]);
-            }
-    
+            $tasks = $tasksQuery->get();    
             return DataTables::of($tasks)
+            ->addColumn('status', function ($task) {
+                return $task->status; // Return status as a simple value
+            })
             ->addColumn('action', function ($task) {
                 // Buttons for System (Desktop) View with Icons + Text
-                $timelineButton = '<a href="#" data-url="' . route('tasks.status.timeline', $task->id) . '" class="ml-1 btn btn-sm btn-info viewTimelineBtn" data-task-id="' . $task->id . '" title="View Timeline">
-                                       <i class="fas fa-history"></i> 
+                $timelineButton = '<a href="#" data-url="' . route('tasks.status.timeline', $task->id) . '" class="ml-1 btn btn-sm viewTimelineBtn" data-task-id="' . $task->id . '" title="View Timeline">
+                                       <i class="fas fa-history" style="color:#0a94cd"></i> 
                                    </a>';
         
-                $editButton = '<a href="#" data-url="' . route('tasks.edit', $task->id) . '" class="btn btn-sm btn-primary edit-btn" title="Edit Task">
-                                   <i class="fas fa-edit"></i> 
+                $editButton = '<a href="#" data-url="' . route('tasks.edit', $task->id) . '" class="btn btn-sm edit-btn" title="Edit Task">
+                                   <i class="fas fa-edit" style="color:#293fa4"></i> 
                                </a>';
         
-                $deleteButton = '<a href="#" class="ml-1 btn btn-sm btn-danger delete-btn" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '" title="Delete Task">
-                                    <i class="fas fa-trash-alt"></i> 
-                                </a>';
-        
-                $updateButton = '<a href="#" data-url="' . route('tasks.update', ['task' => $task->id]) . '" class="ml-1 btn btn-sm btn-success updateStatusBtn" data-task-id="' . $task->id . '" data-description="'. $task->description .'" data-current-status="' . $task->status . '" title="Update Status">
-                                     <i class="fas fa-sync-alt"></i> 
-                                 </a>';
-        
+                $deleteButton = '<a href="#" class="ml-1 btn btn-sm delete-btn" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '" title="Delete Task">
+                                    <i class="fas fa-trash-alt" style="color:red"></i> 
+                                </a>';       
                 $restoreButton = null;
                 if ($task->deleted_at) {
                     if (auth()->user()->hasRole(1)) {
-                        $restoreButton = '<a href="#" class="ml-1 btn btn-sm btn-warning restore-btn" data-url="' . route('tasks.restore', $task->id) . '" title="Restore Task">
-                                              <i class="fas fa-undo"></i> 
+                        $restoreButton = '<a href="#" class="ml-1 btn btn-sm  restore-btn" data-url="' . route('tasks.restore', $task->id) . '" title="Restore Task">
+                                              <i class="fas fa-undo" style="color:grey"></i> 
                                           </a>';
                         return $restoreButton . $timelineButton;
                     }
@@ -68,7 +62,7 @@ class TaskController extends Controller
         
                 $returnData = "";
                 if ($this->checkPermissionBasedRole('write tasks')) {
-                    $returnData = $editButton . $updateButton;
+                    $returnData = $editButton ;
                 }
                 if ($this->checkPermissionBasedRole('delete tasks')) {
                     $returnData .= $deleteButton;
@@ -88,7 +82,6 @@ class TaskController extends Controller
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton-' . $task->id . '">';
                 if ($this->checkPermissionBasedRole('write tasks')) {
                     $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('tasks.edit', $task->id) . '">Edit</a>';
-                    $mobileMenu .= '<a class="dropdown-item updateStatusBtn" href="#" data-url="' . route('tasks.update', ['task' => $task->id]) . '" data-task-id="' . $task->id . '" data-description="'. $task->description .'" data-current-status="' . $task->status . '">Update Status</a>';
                 }
                 if ($this->checkPermissionBasedRole('delete tasks')) {
                     $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '">Delete</a>';
@@ -101,7 +94,7 @@ class TaskController extends Controller
         
                 return $desktopMenu . $mobileMenu;
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['status','action'])
             ->make(true);             
         }
     
@@ -110,6 +103,99 @@ class TaskController extends Controller
         $roles = Role::all();
         return view('tasks.index', compact('departments', 'employees', 'roles'));
     }    
+    public function mytasks(Request $request)
+    {
+        if ($request->ajax()) {
+            $tasks = Task::select(
+                    'tasks.id',
+                    'tasks.title',
+                    'tasks.priority',
+                    'tasks.date as date',  
+                    'tasks.deadline',
+                    'departments.name as departmentname',
+                    'users1.name as username',
+                    'users2.name as updatedby',
+                    'tasks.status'
+                )
+                ->leftJoin('departments', 'tasks.department_id', '=', 'departments.id')
+                ->leftJoin('users as users1', 'tasks.employee_ids', '=', 'users1.id') 
+                ->leftJoin('users as users2', 'tasks.updated_by', '=', 'users2.id') 
+                ->where('tasks.employee_ids', auth()->id());   
+                if (auth()->user()->hasRole(1)) {
+                    $tasks = $tasks->withTrashed();
+                }
+                $tasks = $tasks->get();
+            return DataTables::of($tasks)
+            ->addColumn('status', function ($task) {
+                return $task->status; // Return status as a simple value
+            })
+            ->addColumn('action', function ($task) {
+                // Buttons for System (Desktop) View with Icons + Text
+                $timelineButton = '<a href="#" data-url="' . route('tasks.status.timeline', $task->id) . '" class="ml-1 btn btn-sm viewTimelineBtn" data-task-id="' . $task->id . '" title="View Timeline">
+                                       <i class="fas fa-history" style="color:#0a94cd"></i> 
+                                   </a>';
+        
+                $editButton = '<a href="#" data-url="' . route('tasks.edit', $task->id) . '" class="btn btn-sm edit-btn" title="Edit Task">
+                                   <i class="fas fa-edit" style="color:#293fa4"></i> 
+                               </a>';
+        
+                $deleteButton = '<a href="#" class="ml-1 btn btn-sm delete-btn" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '" title="Delete Task">
+                                    <i class="fas fa-trash-alt" style="color:red"></i> 
+                                </a>';
+                $restoreButton = null;
+                if ($task->deleted_at) {
+                    if (auth()->user()->hasRole(1)) {
+                        $restoreButton = '<a href="#" class="ml-1 btn btn-sm  restore-btn" data-url="' . route('tasks.restore', $task->id) . '" title="Restore Task">
+                                              <i class="fas fa-undo" style="color:grey"></i> 
+                                          </a>';
+                        return $restoreButton . $timelineButton;
+                    }
+                }
+        
+                $returnData = "";
+                if ($this->checkPermissionBasedRole('write tasks')) {
+                    $returnData = $editButton ;
+                }
+                if ($this->checkPermissionBasedRole('delete tasks')) {
+                    $returnData .= $deleteButton;
+                }
+                if ($restoreButton) {
+                    $returnData .= $restoreButton;
+                }
+        
+                // System (Desktop) View: Full buttons with icons + text
+                $desktopMenu = '<div class="d-none d-sm-block">' . $returnData . $timelineButton . '</div>';
+        
+                // Mobile View: Three-dot (⋯) menu with only text options
+                $mobileMenu = '<div class="dropdown d-block d-sm-none">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton-' . $task->id . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    ⋯
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton-' . $task->id . '">';
+                if ($this->checkPermissionBasedRole('write tasks')) {
+                    $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('tasks.edit', $task->id) . '">Edit</a>';
+                }
+                if ($this->checkPermissionBasedRole('delete tasks')) {
+                    $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '">Delete</a>';
+                }
+                if ($restoreButton) {
+                    $mobileMenu .= '<a class="dropdown-item restore-btn" href="#" data-url="' . route('tasks.restore', $task->id) . '">Restore</a>';
+                }
+                $mobileMenu .= '<a class="dropdown-item viewTimelineBtn" href="#" data-url="' . route('tasks.status.timeline', $task->id) . '" data-task-id="' . $task->id . '">View History</a>';
+                $mobileMenu .= '</div></div>';
+        
+                return $desktopMenu . $mobileMenu;
+            })
+            ->rawColumns(['status','action'])
+            ->make(true); 
+        }
+    
+        // Load the view for non-AJAX requests
+        $departments = Department::where('status', 1)->get();
+        $employees = User::where('status', 1)->get();
+        $roles = Role::all();
+        return view('tasks.index1', compact('departments', 'employees', 'roles'));
+    }
 
     /**
      * Search tasks.
@@ -265,20 +351,15 @@ class TaskController extends Controller
     /**
      * Update the specified task.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string',
-            'description' => 'required|string',
+            'status' => 'required|in:Pending,In Progress,Completed,Cancelled'
         ]);
-
-        // Find the task by ID
+    
         $task = Task::findOrFail($id);
-        // Update task status and description
-        $task->update([
-            'status' => $request->status,
-            'description' => $request->description
-        ]);
+        $task->update(['status' => $request->status]); 
+
         TaskDetail::create([
             'task_id' => $task->id,
             'meta_data' => json_encode([
@@ -289,10 +370,15 @@ class TaskController extends Controller
                     'updated_by' => auth()->user()->id,
                 ]
             ]),                
-        ]);        
-
-        return ['success' => 1, 'msg' => "Task Updated Successfully"];
+        ]);      
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Task status updated successfully!',
+            'status' => $task->status
+        ]);   
     }
+
 
     /**
      * Remove the specified task.
@@ -346,11 +432,11 @@ class TaskController extends Controller
             // $timelineHtml .= '</div></div>';
     
             $timelineHtml .= '<div class="timeline-body">';
-            if (isset($taskDetails['updated_by'])) {
-                $timelineHtml .= '<p><strong>Updated By:</strong> ' . (User::find($taskDetails['updated_by']) ? User::find($taskDetails['updated_by'])->name : 'Unknown') . '</p>';
-            }
             if (isset($taskDetails['task_module'])) {
                 $timelineHtml .= '<p><strong>Task Module:</strong> ' . $taskDetails['task_module'] . '</p>';
+            }
+            if (isset($taskDetails['updated_by'])) {
+                $timelineHtml .= '<p><strong>Updated By:</strong> ' . (User::find($taskDetails['updated_by']) ? User::find($taskDetails['updated_by'])->name : 'Unknown') . '</p>';
             }
             if (isset($taskDetails['title'])) {
                 $timelineHtml .= '<p><strong>Title:</strong> ' . $taskDetails['title'] . '</p>';

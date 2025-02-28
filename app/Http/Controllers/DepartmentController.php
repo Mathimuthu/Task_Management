@@ -22,12 +22,12 @@ class DepartmentController extends Controller
     
                 return DataTables::of($products)
                 ->addColumn('action', function ($product) {
-                    $editButton = '<button data-url="' . route('department.edit', $product->id) . '" data-id="' . $product->id . '" data-toggle="modal" data-target="#modalPurple" class="mr-2 btn btn-sm btn-primary edit-btn" title="Edit">
-                                        <i class="fas fa-edit"></i>
+                    $editButton = '<button data-url="' . route('department.edit', $product->id) . '" data-id="' . $product->id . '" data-toggle="modal" data-target="#modalPurple" class="mr-2 btn btn-sm edit-btn" title="Edit">
+                                        <i class="fas fa-edit" style="color:#293fa4"></i>
                                     </button>';
             
-                    $deleteButton = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('department.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
+                    $deleteButton = '<button class="btn btn-sm delete-btn" data-url="' . route('department.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
+                                        <i class="fas fa-trash-alt" style="color:red"></i>
                                     </button>';
             
                     $returnData = "";

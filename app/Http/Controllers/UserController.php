@@ -28,7 +28,14 @@ class UserController extends Controller
             )
             ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')   
             ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')              
-            ->leftJoin('departments', 'users.department_id', '=', 'departments.id');
+            ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
+            ->when($request->status, function ($query, $status) {
+                if ($status === 'Active') {
+                    return $query->where('users.status', 1);
+                } elseif ($status === 'Inactive') {
+                    return $query->where('users.status', 0);
+                }
+            });
 
             // Apply the order by created_at in descending order by default
             $usersQuery = $usersQuery->orderByDesc('users.created_at'); 
@@ -53,8 +60,9 @@ class UserController extends Controller
             $users = $usersQuery->get();
 
             return DataTables::of($users)
+            
             ->addColumn('status', function ($user) {
-                return $user->status ? 1 : 0; // Ensure status is 1 for active
+                return $user->status ? 'Active' : 'Inactive';
             })     
             ->addColumn('action', function ($product) {
                 $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm edit-btn" title="Edit">

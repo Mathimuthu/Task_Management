@@ -19,14 +19,12 @@ class RoleController extends Controller
                     return $role->permissions->pluck('name')->implode(', ');
                 })
                 ->addColumn('action', function ($role) {
-                    $editButton = '<button class="mr-2 btn btn-sm btn-warning edit-btn" data-id="' . $role->id . '">Edit</button>';
-                    $deleteButton = '<button class="btn btn-sm btn-danger delete-btn" data-url="' . route('role.destroy', $role->id) . '">Delete</button>';
+                    $editButton = '<button class="mr-2 btn btn-sm edit-btn" data-id="' . $role->id . '" title="Edit"><i class="fa fa-edit" style="color:#293fa4"></i></button>';
+                    $deleteButton = '<button class="btn btn-sm delete-btn" data-url="' . route('role.destroy', $role->id) . '" title="Delete"><i class="fa fa-trash" style="color:red"></i></button>';
                     $returnData = "";
-                    if (!$this->checkPermissionBasedRole('write role') && $role->id != auth()->user()->role) {
-                        $returnData = $editButton;
-                    }
-                    if ($this->checkPermissionBasedRole('delete role') && $role->id != auth()->user()->role) {
-                        $returnData = $returnData . $deleteButton;
+                   
+                    if ($this->checkPermissionBasedRole('delete role')) {
+                        $returnData .=  $editButton. $deleteButton;
                     }
                     return $returnData;
                 })

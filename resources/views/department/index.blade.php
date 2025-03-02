@@ -71,6 +71,14 @@
             <button onclick="showAddDepartmentModal()" class="bg-purple btn">Add Department</button>
             @endif
         </div>
+        <div class="d-flex justify-content-end mb-2">
+            <label class="me-2 mt-1">Status Filter:</label>
+            <select id="statusFilter" class="form-control w-auto">
+                <option value="">All</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
         <table id="departmentTable" class="table table-bordered">
             <thead>
                 <tr>
@@ -104,18 +112,36 @@
             $('#departmentTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('department.index') }}",
+                ajax: {
+                    url: "{{ route('department.index') }}",
+                    data: function (d) {
+                        d.status = $('#statusFilter').val(); // Use dropdown or dynamic filter
+                    }
+                },
                 columns: [
                     { data: "id", "render": function(data, type, row, meta) { return meta.row + 1; } },
                     { data: 'name', name: 'name' },
                     { data: 'manager_name', name: 'manager_name' }, 
-                    { data: "status", "render": function(data, type, row) { return data == 1 ? 'Active' : 'Inactive'; } },
+                    {
+                    data: "status", 
+                    name: "status",
+                    orderable: false,
+                    searchable: true,
+                    "render": function(data, type, row) {
+                        let checked = data == 'Active' ? 'checked' : '';
+                        let titleText = data == 'Active' ? 'Active' : 'Inactive'; 
+                        return data == 1 ? 'Active' : 'Inactive';
+                    }
+                },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],
                 language: {
                     lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries Per Page',
                     info: 'Showing _START_ to _END_ of _TOTAL_ Entries' 
                 }
+            });
+            $('#statusFilter').on('change', function() {
+                $('#departmentTable').DataTable().ajax.reload();
             });
             $(window).resize(function() {
                 if ($(window).width() <= 767) {

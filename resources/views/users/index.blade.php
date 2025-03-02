@@ -129,6 +129,14 @@ input:checked + .slider:before {
                 <button onclick="showAddEmployeeModal()" class="bg-purple btn">Add Employee</button>
             @endif
         </div>
+        <div class="d-flex justify-content-end mb-2">
+            <select id="statusFilter" class="form-control w-auto">
+                <option>Status Filter </option>
+                <option value="">All</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
         <table id="productTable" class="table table-bordered">
             <thead>
                 <tr>
@@ -167,7 +175,12 @@ input:checked + .slider:before {
         $('#productTable').DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{{ route('users.index') }}",
+            ajax: {
+                url: "{{ route('users.index') }}",
+                data: function (d) {
+                    d.status = $('#statusFilter').val(); // Use dropdown or dynamic filter
+                }
+            },
             columns: [
                 { 
                     data: "id", 
@@ -187,8 +200,9 @@ input:checked + .slider:before {
                     orderable: false,
                     searchable: true,
                     "render": function(data, type, row) {
-                        let checked = data == 1 ? 'checked' : ''; // Ensure 1 means active
-                        let titleText = data == 1 ? 'Active' : 'Inactive'; // Set title
+                        console.log(data);
+                        let checked = data == 'Active' ? 'checked' : '';
+                        let titleText = data == 'Active' ? 'Active' : 'Inactive'; 
                         return `
                             <label class="switch" title="${titleText}">
                                 <input type="checkbox" class="toggle-status" data-id="${row.id}" ${checked}>
@@ -205,6 +219,16 @@ input:checked + .slider:before {
                 info: 'Showing _START_ to _END_ of _TOTAL_ Entries'
             }
         });
+        $('#statusFilter').on('change', function() {
+            $('#productTable').DataTable().ajax.reload();
+        });
+        $(window).resize(function() {
+                if ($(window).width() <= 767) {
+                    $(".table").addClass("table-responsive");
+                } else {
+                    $(".table").removeClass("table-responsive");
+                }
+            }).trigger('resize');
     });
     $(document).on('change', '.toggle-status', function() {
         let userId = $(this).data('id');
@@ -249,13 +273,6 @@ input:checked + .slider:before {
                 $(this).prop('checked', !isChecked);
             }
         });
-            $(window).resize(function() {
-                if ($(window).width() <= 767) {
-                    $(".table").addClass("table-responsive");
-                } else {
-                    $(".table").removeClass("table-responsive");
-                }
-            }).trigger('resize');
         });
         // $(document).on('click', '.updateStatusBtn', function() {
         //     let taskId = $(this).data("users-id");

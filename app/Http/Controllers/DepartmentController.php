@@ -18,6 +18,13 @@ class DepartmentController extends Controller
         if ($request->ajax()) {
             $products = Department::select('departments.*', 'users.name as manager_name')
                 ->leftJoin('users', 'users.id', '=', 'departments.manager_id')
+                ->when($request->status, function ($query, $status) {
+                    if ($status === 'Active') {
+                        return $query->where('departments.status', 1);
+                    } elseif ($status === 'Inactive') {
+                        return $query->where('departments.status', 0);
+                    }
+                })    
                 ->get();
     
                 return DataTables::of($products)

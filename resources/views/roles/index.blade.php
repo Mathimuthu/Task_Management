@@ -3,6 +3,80 @@
 @section('title', 'Roles Management')
 
 @section('content')
+<style>
+    /* Make the table horizontally scrollable */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+}
+
+/* Adjust label widths for small screens */
+@media (max-width: 767px) {
+    .user-info {
+        font-size: 12px;
+    }
+
+    .label {
+        width: auto; /* Allow labels to adjust width */
+    }
+
+    /* Adjust modal content for small screens */
+    .modal-content {
+        width: 90%;
+    }
+
+    /* Stack the buttons vertically in smaller screens */
+    .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Style for buttons on mobile devices */
+    .btn {
+        font-size: 12px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Make the table smaller and more compact */
+    .table th, .table td {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+/* Adjust for very small screens (portrait mode on mobile) */
+@media (max-width: 480px) {
+    .d-flex {
+        flex-direction: column;
+    }
+
+    .table th, .table td {
+        font-size: 10px;
+        padding: 5px;
+    }
+}
+/* Ensure action buttons stay in one row */
+.table td .btn {
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Prevent wrapping on smaller screens */
+@media (max-width: 767px) {
+    .table td {
+        white-space: nowrap;
+    }
+
+    .table td .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+</style>
     <div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Role List</h2>
@@ -90,10 +164,23 @@
                         data: 'action',
                         name: 'action',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        className: "text-center", 
+                        width: "100px"
                     }
-                ]
+                ],
+                language: {
+                    lengthMenu: 'Show &nbsp;_MENU_ &nbsp;&nbsp;Entries Per Page',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ Entries' 
+                }
             });
+            $(window).resize(function() {
+                if ($(window).width() <= 767) {
+                    $(".table").addClass("table-responsive");
+                } else {
+                    $(".table").removeClass("table-responsive");
+                }
+            }).trigger('resize');
         });
         // Open Edit Modal and Fetch Role Data
         $(document).on('click', '.edit-btn', function() {

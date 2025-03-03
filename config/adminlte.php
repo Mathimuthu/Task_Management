@@ -318,26 +318,31 @@ return [
             'text' => 'Employees',
             'url' => 'users',
             'icon' => 'fas fa-fw fa-user',
+            'can' => 'read users',
         ],
         [
             'text' => 'Departments',
             'url' => 'department',
             'icon' => 'fas fa-fw fa-building',
+            'can' => 'read department',
         ],
         [
             'text' => 'Tasks',
             'url' => 'tasks',
             'icon' => 'fas fa-fw fa-tasks',
+            'can' => 'read tasks',
         ],
         [
             'text' => 'My Tasks',
             'url' => 'mytasks',
             'icon' => 'fas fa-fw fa-clipboard-list',
+            'can' => 'read mytasks',
         ],
         [
             'text' => 'Roles',
             'url' => 'role',
             'icon' => 'fas fa-fw fa-users',
+            'can' => 'read role',
         ],
     ],
 

@@ -22,9 +22,11 @@ class RoleController extends Controller
                     $editButton = '<button class="mr-2 btn btn-sm edit-btn" data-id="' . $role->id . '" title="Edit"><i class="fa fa-edit" style="color:#293fa4"></i></button>';
                     $deleteButton = '<button class="btn btn-sm delete-btn" data-url="' . route('role.destroy', $role->id) . '" title="Delete"><i class="fa fa-trash" style="color:red"></i></button>';
                     $returnData = "";
-                   
+                    if ($this->checkPermissionBasedRole('write role')) {
+                        $returnData .=  $editButton;
+                    }
                     if ($this->checkPermissionBasedRole('delete role')) {
-                        $returnData .=  $editButton. $deleteButton;
+                        $returnData .=  $deleteButton;
                     }
                     return $returnData;
                 })

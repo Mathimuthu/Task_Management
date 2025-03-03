@@ -26,8 +26,7 @@ class UserController extends Controller
                 'departments.name as department_names',                    
                 'users.department_id'
             )
-            ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')   
-            ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')              
+            ->leftJoin('roles', 'users.role', '=', 'roles.id')         
             ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
             ->when($request->status, function ($query, $status) {
                 if ($status === 'Active') {
@@ -65,35 +64,49 @@ class UserController extends Controller
                 return $user->status ? 'Active' : 'Inactive';
             })     
             ->addColumn('action', function ($product) {
-                $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm edit-btn" title="Edit">
-                                <i class="fas fa-edit" style="color:#293fa4"></i>
-                            </button>';
+                // View Button
                 $viewButton = '<button class="ml-1 btn btn-sm view-btn" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '" title="View">
                                 <i class="fas fa-eye" style="color:#0a94cd"></i>
                             </button>';
-                $deleteButton = '<button class="ml-1 btn btn-sm delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
-                                    <i class="fas fa-trash-alt" style="color:red"></i>
-                                </button>';
-        
+            
+                // Restore Button (Only if user is deleted)
                 $restoreButton = "";
-                if ($product->deleted_at && auth()->user()->hasRole(1)) {
+                if ($product->deleted_at) {
                     $restoreButton = '<button class="ml-1 btn btn-sm restore-btn" data-url="' . route('users.restore', $product->id) . '" title="Restore">
                                         <i class="fas fa-undo" style="color:grey"></i> 
                                     </button>';
                 }
             
-                // Mobile View: Three-dot menu (⋯) with only text options
+                // If the user is not deleted, show Edit and Delete buttons
+                if (!$product->deleted_at) {
+                    $editButton = '<button data-url="' . route('users.edit', $product->id) . '" class="btn btn-sm edit-btn" title="Edit">
+                                    <i class="fas fa-edit" style="color:#293fa4"></i>
+                                </button>';
+                    $deleteButton = '<button class="ml-1 btn btn-sm delete-btn" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '" title="Delete">
+                                        <i class="fas fa-trash-alt" style="color:red"></i>
+                                    </button>';
+                } else {
+                    $editButton = "";
+                    $deleteButton = "";
+                }
+            
+                // Desktop View: Show only relevant buttons
+                $desktopMenu = '<div class="d-none d-sm-block">' . $editButton . $deleteButton . $viewButton . $restoreButton . '</div>';
+            
+                // Mobile View: Three-dot menu (⋯) with only valid options
                 $mobileMenu = '<div class="dropdown d-block d-sm-none">
                                 <button class="btn btn-sm" type="button" id="dropdownMenuButton-' . $product->id . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     ⋯
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton-' . $product->id . '">';
-                
-                if ($this->checkPermissionBasedRole('write users')) {
-                    $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('users.edit', $product->id) . '">Edit</a>';
-                }
-                if ($this->checkPermissionBasedRole('delete users') && !$product->deleted_at) {
-                    $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '">Delete</a>';
+            
+                if (!$product->deleted_at) {
+                    if ($this->checkPermissionBasedRole('write users')) {
+                        $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('users.edit', $product->id) . '">Edit</a>';
+                    }
+                    if ($this->checkPermissionBasedRole('delete users')) {
+                        $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('users.destroy', $product->id) . '" data-id="' . $product->id . '">Delete</a>';
+                    }
                 }
                 if ($this->checkPermissionBasedRole('read users')) {
                     $mobileMenu .= '<a class="dropdown-item view-btn" href="#" data-url="' . route('users.show', $product->id) . '" data-id="' . $product->id . '">View</a>';
@@ -101,11 +114,9 @@ class UserController extends Controller
                 if ($restoreButton) {
                     $mobileMenu .= '<a class="dropdown-item restore-btn" href="#" data-url="' . route('users.restore', $product->id) . '">Restore</a>';
                 }
+            
                 $mobileMenu .= '</div></div>';
-        
-                // Desktop View: Full buttons (TEXT ONLY, NO ICONS)
-                $desktopMenu = '<div class="d-none d-sm-block">' . $editButton  . $deleteButton . $viewButton . $restoreButton . '</div>';
-        
+            
                 return $desktopMenu . $mobileMenu;
             })            
             ->rawColumns(['status','action'])
@@ -179,10 +190,15 @@ class UserController extends Controller
                 }                
                 if ($request->has('user_id') && !empty($request->user_id)) {
                     $user = User::find($request->user_id);
-                    $role = Role::where('id', $request->role)->first();
-                    if (!$user->hasRole($role->name)) {
-                        $user->syncRoles($role);
-                    }
+                    $role = Role::findOrFail($request->role);
+
+                    // Sync the user's role
+                    $user->syncRoles([$role->name]);
+
+                    // Sync permissions based on the role
+                    $permissions = $role->permissions->pluck('name')->toArray();
+                    $user->syncPermissions($permissions);
+
                     if ($request->has('department_id')) {
                         // Get existing managers of the department
                         $existingDepartment = Department::find($request->department_id);
@@ -199,6 +215,13 @@ class UserController extends Controller
                 } else {
                     $userData['password'] = bcrypt("12345678");
                     $user = User::create($userData);
+                    $role = Role::findOrFail($request->role);
+                    $user->assignRole($role->name);
+                
+                    // Sync permissions from role
+                    $permissions = $role->permissions->pluck('name')->toArray();
+                    $user->syncPermissions($permissions);
+
                     if ($department) {
                         // Get current managers, add new user
                         $currentManagers = $department->manager_id ? json_decode($department->manager_id) : [];
@@ -222,7 +245,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::select(
+        $user = User::withTrashed()->select(
             'users.id',
             'users.name',
             'users.registration_no',
@@ -257,7 +280,6 @@ class UserController extends Controller
             'users1.name'
         )
         ->first(); 
-
         return response()->json($user);
     }
 

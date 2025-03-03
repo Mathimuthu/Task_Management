@@ -4,6 +4,57 @@
 
 @section('content')
 <style>
+    /* Ensure text inside spans doesn't overflow */
+.user-info span {
+    display: inline-block;
+    max-width: 100%; /* Prevent text overflow */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ensure modal content is fully visible on small screens */
+.modal-body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Make the modal content responsive */
+@media (max-width: 767px) {
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+    }
+
+    .user-info {
+        font-size: 12px; /* Reduce font size for better fit */
+        flex-wrap: wrap; /* Allow content to wrap */
+    }
+
+    .label {
+        width: 100px; /* Reduce label width on smaller screens */
+        white-space: normal; /* Allow label text to wrap */
+    }
+
+    /* Ensure images scale correctly */
+    #view_photo {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* Further adjustments for very small screens */
+@media (max-width: 480px) {
+    .label {
+        width: auto;
+    }
+
+    .user-info {
+        font-size: 11px;
+    }
+}
+
     .user-info {
         display: flex;
         align-items: center;

@@ -170,6 +170,39 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(16px);
 }
+/* Ensure table width does not exceed 90% of the screen */
+.table {
+    max-width: 90%;
+    margin: auto; /* Center the table */
+}
+
+/* Make the table responsive */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%; /* Ensure it takes full available space */
+}
+
+/* Adjust table cells for better viewing */
+.table th, .table td {
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 767px) {
+    .table-responsive {
+        max-width: 100%; /* Allow full width on smaller screens */
+    }
+
+    .table {
+        font-size: 12px; /* Reduce font size for readability */
+    }
+
+    .table th, .table td {
+        padding: 8px;
+        font-size: 10px;
+    }
+}
 
 </style>
 

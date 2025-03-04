@@ -229,7 +229,6 @@ class TaskController extends Controller
             'assign_date' => 'required|date',
             'deadline' => 'nullable|date',
             'department_id' => 'required|integer',
-            // 'role_id' => 'required|integer',
             'employee_ids' => 'required',
             'status' => 'required|in:Pending,In Progress,Completed',
         ]);
@@ -251,10 +250,11 @@ class TaskController extends Controller
                 'status' => $request->status,
                 'updated_by' => Auth::user()->id,
             ];
+
             if ($request->hasFile('upload_task')) {
                 $uploadTask = $request->file('upload_task');
                 $maxSize = 41943040; 
-                $allowedExtensions = ['pdf', 'docx'];
+                $allowedExtensions = ['pdf', 'docx','jpeg','jpg','webp'];
                 $fileExtension = $uploadTask->getClientOriginalExtension();
                 $fileSize = $uploadTask->getSize();
             
@@ -269,11 +269,13 @@ class TaskController extends Controller
                 } else {
                     return response()->json(['error' => 'Invalid file type. Only PDF and DOCX are allowed.'], 400);
                 }
-            }            
+            }    
+
             if ($request->has('task_id') && !empty($request->task_id)) {
                 $task = Task::find($request->task_id);
                 if ($task) {
                     $task->update($taskData);
+
                     TaskDetail::create([
                         'task_id' => $task->id,
                         'meta_data' => json_encode([
@@ -290,7 +292,7 @@ class TaskController extends Controller
                                 'status' => $request->status,
                                 'updated_by' => auth()->user()->id
                             ]
-                            ])
+                        ])
                     ]);
                 }
                 return response()->json(['success' => 1, 'msg' => "Task Updated Successfully"]);
@@ -312,7 +314,7 @@ class TaskController extends Controller
                             'status' => $request->status,
                             'updated_by' => auth()->user()->id
                         ]
-                        ])
+                    ])
                 ]);                
                 return response()->json([
                     'success' => 1,
@@ -401,42 +403,34 @@ class TaskController extends Controller
 
     public function getTaskTimeline($taskId)
     {
-        // Fetch task details from the database
         $taskDetails = TaskDetail::where('task_id', $taskId)
-            ->orderBy('updated_at', 'ASC')
+            ->orderBy('updated_at', 'DESC')
             ->get();
-    
+
         if ($taskDetails->isEmpty()) {
             return response()->json([
                 'success' => false, 
                 'html' => '<li>No status updates available.</li>'
             ]);
         }
-    
-        // Start constructing the HTML content for the timeline
+
         $timelineHtml = '';
-    
+
         foreach ($taskDetails as $detail) {
-            // Decode the meta data to extract task details
             $metaData = json_decode($detail->meta_data, true);
             $taskDetails = $metaData['task_details'] ?? [];
-    
-            // Build the timeline item for each task update
+
             $timelineHtml .= '<li class="timeline-item">';
-            $timelineHtml .= '<div class="timeline-icon  status-date"> ' . $detail->updated_at->format('d-m-Y H:i:s') . ' </div>';
+            $timelineHtml .= '<div class="timeline-icon status-date"> ' . $detail->updated_at->format('d F Y, h:i A') . ' </div>';
             $timelineHtml .= '<div class="timeline-content">';
-            // $timelineHtml .= '<div class="timeline-header">';
-            // $timelineHtml .= '<span class="status-date">' . $detail->updated_at->format('Y-m-d H:i:s') . '</span>';
-            // $timelineHtml .= '<div class="task-user">';
-            // $timelineHtml .= '<span class="user-name">' . (User::find($taskDetails['updated_by']) ? User::find($taskDetails['updated_by'])->name : 'Unknown') . '</span>';
-            // $timelineHtml .= '</div></div>';
-    
             $timelineHtml .= '<div class="timeline-body">';
+
             if (isset($taskDetails['task_module'])) {
-                $timelineHtml .= '<p><strong>Task Module:</strong> ' . $taskDetails['task_module'] . '</p>';
+                $timelineHtml .= '<p><strong>Task Action:</strong> ' . $taskDetails['task_module'] . '</p>';
             }
             if (isset($taskDetails['updated_by'])) {
-                $timelineHtml .= '<p><strong>Updated By:</strong> ' . (User::find($taskDetails['updated_by']) ? User::find($taskDetails['updated_by'])->name : 'Unknown') . '</p>';
+                $user = User::find($taskDetails['updated_by']);
+                $timelineHtml .= '<p><strong>Updated By:</strong> ' . ($user ? $user->name : 'Unknown') . '</p>';
             }
             if (isset($taskDetails['title'])) {
                 $timelineHtml .= '<p><strong>Title:</strong> ' . $taskDetails['title'] . '</p>';
@@ -444,7 +438,7 @@ class TaskController extends Controller
             if (isset($taskDetails['status'])) {
                 $timelineHtml .= '<p><strong>Status:</strong> ' . $taskDetails['status'] . '</p>';
             }
-            if (isset($taskDetails['description'])) {
+            if (isset($taskDetails['description']) && !empty($taskDetails['description'])) {
                 $timelineHtml .= '<p><strong>Description:</strong> ' . $taskDetails['description'] . '</p>';
             }
             if (isset($taskDetails['priority'])) {
@@ -458,15 +452,21 @@ class TaskController extends Controller
                 $employees = User::whereIn('id', explode(',', $taskDetails['employee_ids']))->pluck('name')->toArray();
                 $timelineHtml .= '<p><strong>Assigned Employee(s):</strong> ' . implode(', ', $employees) . '</p>';
             }
+            if (isset($taskDetails['date'])) {
+                $timelineHtml .= '<p><strong>Assign Date:</strong> ' . $taskDetails['date'] . '</p>';
+            }
+            if (isset($taskDetails['deadline'])) {
+                $timelineHtml .= '<p><strong>Deadline:</strong> ' . $taskDetails['deadline'] . '</p>';
+            }
+
             $timelineHtml .= '</div></div></li>';
         }
-    
+
         return response()->json([
             'success' => true,
             'html' => $timelineHtml
         ]);
     }
-    
     public function restore($id)
     {
         $task = Task::onlyTrashed()->findOrFail($id);

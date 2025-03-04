@@ -4,8 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,17 +15,36 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
 
-        User::factory()->create([
-            'name' => 'Jenitta',
-            'email' => 'jenitta@example.com',
-        ]);
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'manager']);
-        Role::create(['name' => 'employee']);
-        // Assign roles to users
-        $admin = User::find(1); // Change with actual user ID
-        $admin->assignRole('admin');
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@gmail.com'], 
+            [
+                'name' => 'Jenitta',
+                'mobile' => '1234567890',
+                'password' => bcrypt('password'),
+                'role' => 1,
+            ]
+        );        
+
+        Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'employee', 'guard_name' => 'web']);
+
+        $permissions = [
+            'read users', 'write users', 'delete users',
+            'read department', 'write department', 'delete department',
+            'read role', 'write role', 'delete role',
+            'read tasks', 'write tasks', 'delete tasks',
+            'read mytasks', 'write mytasks', 'delete mytasks',
+        ];
+
+        foreach ($permissions as $permission) {
+            $perm = Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+            $adminRole->givePermissionTo($perm);
+        }
+
+        $admin->syncRoles([$adminRole]);
+
+        $admin->syncPermissions($adminRole->permissions);
     }
 }

@@ -79,7 +79,7 @@ class DepartmentController extends Controller
                 ->make(true);            
         }
     
-        $employees = User::where('status', 1)->where('role', 2)->get();
+        $employees = User::where('status', 1)->get();
         $hasCreatepermissions = $this->checkPermissionBasedRole('write department');
     
         return view('department.index', compact('employees', 'hasCreatepermissions'));

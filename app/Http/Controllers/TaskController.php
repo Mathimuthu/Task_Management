@@ -27,12 +27,22 @@ class TaskController extends Controller
                             'users1.name as username', 'users2.name as updatedby')
                 ->leftJoin('departments', 'tasks.department_id', '=', 'departments.id')
                 ->leftJoin('users as users1', 'tasks.employee_ids', '=', 'users1.id') 
-                ->leftJoin('users as users2', 'tasks.updated_by', '=', 'users2.id')
-                ->where('tasks.employee_ids', '!=', auth()->id()); 
-            if (auth()->user()->hasRole(1)) {
+                ->leftJoin('users as users2', 'tasks.updated_by', '=', 'users2.id');
+
+            $user = auth()->user();
+            if ($user->hasAnyRole(['Admin', 'HR'])) {
                 $tasksQuery = $tasksQuery->withTrashed();
+            } elseif ($user->hasRole('Employee')) {
+                // Employees only see their assigned tasks
+                $tasksQuery->where('tasks.employee_ids', '=', $user->id);
+            } else {
+                // Other roles see tasks assigned to users they created
+                $userIds = User::where('created_by', $user->id)->pluck('id')->toArray();
+                $tasksQuery->whereIn('tasks.employee_ids', $userIds);
             }
+
             $tasks = $tasksQuery->get();    
+
             return DataTables::of($tasks)
             ->addColumn('status', function ($task) {
                 return $task->status; // Return status as a simple value
@@ -99,7 +109,15 @@ class TaskController extends Controller
         }
     
         $departments = Department::where('status', 1)->get();
-        $employees = User::where('status', 1)->get();
+        $loggedInUser = auth()->user();
+        if ($loggedInUser->hasAnyRole(['Admin', 'HR'])) {
+            $employees = User::where('status', 1)->get(); // Show all employees
+        } elseif ($loggedInUser->hasRole('Employee')) {
+            $employees = User::where('id', $loggedInUser->id)->where('status', 1)->get(); // Show only the logged-in employee
+        } else {
+            // Show users created by the logged-in user
+            $employees = User::where('created_by', $loggedInUser->id)->where('status', 1)->get();
+        }
         $roles = Role::all();
         return view('tasks.index', compact('departments', 'employees', 'roles'));
     }    

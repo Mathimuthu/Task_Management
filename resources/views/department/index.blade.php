@@ -82,7 +82,7 @@
         <table id="departmentTable" class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Name</th>
                     <th>Manager</th>
                     <th>Status</th>

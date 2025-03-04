@@ -107,7 +107,7 @@
         <table id="taskTable" class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Title</th>
                     <th>Priority</th>
                     <th>Assign Date</th>

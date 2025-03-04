@@ -36,17 +36,16 @@ class UserController extends Controller
                 }
             });
 
-            // Apply the order by created_at in descending order by default
             $usersQuery = $usersQuery->orderByDesc('users.created_at'); 
-
-            if (auth()->user()->hasRole(1)) {
-                $usersQuery = $usersQuery->withTrashed();  // Include soft-deleted users if admin
+            
+            if (auth()->user()->hasAnyRole(['Admin', 'HR'])) {
+                $usersQuery = $usersQuery->withTrashed(); // Admin & HR see all users, including deleted ones
+            } elseif (auth()->user()->hasAnyRole(['Employee'])) {
+                $usersQuery = $usersQuery->where('users.id', auth()->user()->id); // Employee sees only their own record
+            } else {
+                $usersQuery = $usersQuery->where('users.created_by', auth()->id()); // Other users see only what they created
             }
-
-            if (!auth()->user()->isAdmin()) {
-                $usersQuery = $usersQuery->where('users.id', auth()->user()->id); // Only show the logged-in user
-            }
-
+                      
             // Apply sorting from DataTables if it's present
             if ($request->has('order')) {
                 $columnIndex = $request->input('order.0.column');
@@ -153,17 +152,19 @@ class UserController extends Controller
             $output = array('success' => 0, 'msg' => "You don't have permission to create/update user");
         }
         $userId = $request->user_id ?? null; // Check if it's an update
+        DB::enableQueryLog();
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:64',
             'mobile' => 'required|max:10',
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users', 'email')->ignore($userId), // Ignore current user
+                Rule::unique('users', 'email')->ignore($userId),
             ],
             'role' => 'required',
         ]);
-
+        \Log::info(DB::getQueryLog());
+        
         if ($validator->fails()) {
             $output = array('success' => 0, 'msg' => $validator->errors()->first());
             return $output;

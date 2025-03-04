@@ -191,10 +191,10 @@ input:checked + .slider:before {
         <table id="productTable" class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>S.No</th>
                     <th>Name</th>
-                    <th>Register.No</th>
-                    <th>Mobile</th>
+                    <th>Register Number</th>
+                    <th>Phone Number</th>
                     <th>Email</th>
                     <th>Department</th>
                     <th>Role</th>

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Jenitta',
                 'mobile' => '1234567890',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('12345678'),
                 'role' => 1,
             ]
         );        

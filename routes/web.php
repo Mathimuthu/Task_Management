@@ -9,18 +9,18 @@ use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\TaskController;
 
-// Route::get('/', function () {
-//     return view('home');
-// });
-
+Route::get('/', function () {
+    return view('landing'); 
+})->name('landing');
 Route::get('/dashboard', function () {
     return view('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(function () {
-    Route::get('/', function () {
-        return view('home');
-    });
+    Route::get('/login', function () {
+        return redirect()->route('landing'); 
+    })->name('login');
+    
     Route::get('mytasks', [TaskController::class, 'mytasks'])->name('mytasks');
     Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('users', UserController::class);

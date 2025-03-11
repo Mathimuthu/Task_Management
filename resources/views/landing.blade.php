@@ -41,18 +41,19 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- <img src="assets/img/logo.png" alt=""> -->
+      <a href="#home-section" class="logo d-flex align-items-center me-auto me-xl-0">
+        <img src="/images/logororiri.png" alt="">
         <h1 class="sitename">Roriri HRMS</h1>
       </a>
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="#hero" class="active">Home</a></li>
-          <li><a href="#features">Key Features</a></li>
-          <li><a href="#services">Future Enhancement</a></li>
-          <li><a href="#faq">FAQ</a></li>
-          <!-- <li><a href="#pricing">Pricing</a></li> -->
+        <ul>
+          <li><a href="#home-section" onclick="showMainSections()" class="active">Home</a></li>
+          <li><a href="#features-section" onclick="showMainSections()">Key Features</a></li>
+          <li><a href="#services-section" onclick="showMainSections()">Future Enhancements</a></li>
+          <li><a href="#faq" onclick="showMainSections()">FAQ</a></li>
+          <li><a href="#footer" onclick="showMainSections()">About</a></li>
           <!-- <li class="dropdown"><a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="#">Dropdown 1</a></li>
@@ -83,10 +84,8 @@
   <main class="main">
 
     <!-- Hero Section -->
-    <section id="hero" class="hero section">
-
+    <section id="home-section" class="hero section">
       <div class="container" data-aos="fade-up" data-aos-delay="100">
-
         <div class="row align-items-center">
           <div class="col-lg-6">
             <div class="hero-content" data-aos="fade-up" data-aos-delay="200">
@@ -94,31 +93,26 @@
                 <i class="bi bi-gear-fill me-2"></i>
                 Working for your success
               </div>
-
               <h1 class="mb-4">
                Task management <br>
                 System <br>
                 <!-- <span class="accent-text">Vestibulum Ante</span> -->
               </h1>
-
               <p class="mb-4 mb-md-5">
               The Task Management System is a web-based application built with Laravel. It helps users create, assign, track, and manage tasks efficiently. The system uses DataTables for data representation and provides role-based access control.
               </p>
-
               <div class="hero-buttons">
                 <a href="{{ route('login') }}" class="btn btn-primary me-0 me-sm-2 mx-1">Get Started</a>
-                <!-- <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="btn btn-link mt-2 mt-sm-0 glightbox">
+                <a href="https://youtu.be/WV3xOWBYrGU?si=GLoNh3Ur5o7Dn_m8" class="btn btn-link mt-2 mt-sm-0 glightbox">
                   <i class="bi bi-play-circle me-1"></i>
                   Play Video
-                </a> -->
+                </a>
               </div>
             </div>
           </div>
-
           <div class="col-lg-6">
             <div class="hero-image" data-aos="zoom-out" data-aos-delay="300">
               <img src="assets/img/illustration-1.webp" alt="Hero Image" class="img-fluid">
-
               <!-- <div class="customers-badge">
                 <div class="customer-avatars">
                   <img src="assets/img/avatar-1.webp" alt="Customer 1" class="avatar">
@@ -133,7 +127,6 @@
             </div>
           </div>
         </div>
-
         <div class="row stats-row gy-4 mt-5" data-aos="fade-up" data-aos-delay="500">
           <div class="col-lg-3 col-md-6">
             <div class="stat-item">
@@ -183,234 +176,9 @@
 
       </div>
 
-    </section>
-
-    <!-- About Section -->
-    <!-- <section id="about" class="about section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4 align-items-center justify-content-between">
-
-          <div class="col-xl-5" data-aos="fade-up" data-aos-delay="200">
-            <span class="about-meta">MORE ABOUT US</span>
-            <h2 class="about-title">Voluptas enim suscipit temporibus</h2>
-            <p class="about-description">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-
-            <div class="row feature-list-wrapper">
-              <div class="col-md-6">
-                <ul class="feature-list">
-                  <li><i class="bi bi-check-circle-fill"></i> Lorem ipsum dolor sit amet</li>
-                  <li><i class="bi bi-check-circle-fill"></i> Consectetur adipiscing elit</li>
-                  <li><i class="bi bi-check-circle-fill"></i> Sed do eiusmod tempor</li>
-                </ul>
-              </div>
-              <div class="col-md-6">
-                <ul class="feature-list">
-                  <li><i class="bi bi-check-circle-fill"></i> Incididunt ut labore et</li>
-                  <li><i class="bi bi-check-circle-fill"></i> Dolore magna aliqua</li>
-                  <li><i class="bi bi-check-circle-fill"></i> Ut enim ad minim veniam</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="info-wrapper">
-              <div class="row gy-4">
-                <div class="col-lg-5">
-                  <div class="profile d-flex align-items-center gap-3">
-                    <img src="assets/img/avatar-1.webp" alt="CEO Profile" class="profile-image">
-                    <div>
-                      <h4 class="profile-name">Mario Smith</h4>
-                      <p class="profile-position">CEO &amp; Founder</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-7">
-                  <div class="contact-info d-flex align-items-center gap-2">
-                    <i class="bi bi-telephone-fill"></i>
-                    <div>
-                      <p class="contact-label">Call us anytime</p>
-                      <p class="contact-number">+123 456-789</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-xl-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="image-wrapper">
-              <div class="images position-relative" data-aos="zoom-out" data-aos-delay="400">
-                <img src="assets/img/about-5.webp" alt="Business Meeting" class="img-fluid main-image rounded-4">
-                <img src="assets/img/about-2.webp" alt="Team Discussion" class="img-fluid small-image rounded-4">
-              </div>
-              <div class="experience-badge floating">
-                <h3>15+ <span>Years</span></h3>
-                <p>Of experience in business service</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /About Section -->
-
-    <!-- Features Section -->
-    <!-- <section id="features" class="features section">
-
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Features</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-      </div>
-
-      <div class="container">
-
-        <div class="d-flex justify-content-center">
-
-          <ul class="nav nav-tabs" data-aos="fade-up" data-aos-delay="100">
-
-            <li class="nav-item">
-              <a class="nav-link active show" data-bs-toggle="tab" data-bs-target="#features-tab-1">
-                <h4>Task Creation</h4>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="tab" data-bs-target="#features-tab-2">
-                <h4>Tracking</h4>
-              </a>
-
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="tab" data-bs-target="#features-tab-3">
-                <h4>User Management</h4>
-              </a>
-            </li>
-
-          </ul>
-
-        </div>
-
-        <div class="tab-content" data-aos="fade-up" data-aos-delay="200">
-
-          <div class="tab-pane fade active show" id="features-tab-1">
-            <div class="row">
-              <div class="col-lg-6 order-2 order-lg-1 mt-3 mt-lg-0 d-flex flex-column justify-content-center">
-                <h3>Voluptatem dignissimos provident</h3>
-                <p class="fst-italic">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua.
-                </p>
-                <ul>
-                  <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Duis aute irure dolor in reprehenderit in voluptate velit.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate trideta storacalaperda mastiro dolore eu fugiat nulla pariatur.</span></li>
-                </ul>
-              </div>
-              <div class="col-lg-6 order-1 order-lg-2 text-center">
-                <img src="assets/img/features-illustration-1.webp" alt="" class="img-fluid">
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="features-tab-2">
-            <div class="row">
-              <div class="col-lg-6 order-2 order-lg-1 mt-3 mt-lg-0 d-flex flex-column justify-content-center">
-                <h3>Neque exercitationem debitis</h3>
-                <p class="fst-italic">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua.
-                </p>
-                <ul>
-                  <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Duis aute irure dolor in reprehenderit in voluptate velit.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Provident mollitia neque rerum asperiores dolores quos qui a. Ipsum neque dolor voluptate nisi sed.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate trideta storacalaperda mastiro dolore eu fugiat nulla pariatur.</span></li>
-                </ul>
-              </div>
-              <div class="col-lg-6 order-1 order-lg-2 text-center">
-                <img src="assets/img/features-illustration-2.webp" alt="" class="img-fluid">
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="features-tab-3">
-            <div class="row">
-              <div class="col-lg-6 order-2 order-lg-1 mt-3 mt-lg-0 d-flex flex-column justify-content-center">
-                <h3>Voluptatibus commodi accusamu</h3>
-                <ul>
-                  <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Duis aute irure dolor in reprehenderit in voluptate velit.</span></li>
-                  <li><i class="bi bi-check2-all"></i> <span>Provident mollitia neque rerum asperiores dolores quos qui a. Ipsum neque dolor voluptate nisi sed.</span></li>
-                </ul>
-                <p class="fst-italic">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                  magna aliqua.
-                </p>
-              </div>
-              <div class="col-lg-6 order-1 order-lg-2 text-center">
-                <img src="assets/img/features-illustration-3.webp" alt="" class="img-fluid">
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Features Section -->
-
-    <!-- Features Cards Section -->
-     <!-- <section id="features-cards" class="features-cards section">
-
-      <div class="container">
-
-        <div class="row gy-4">
-
-          <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
-            <div class="feature-box orange">
-              <i class="bi bi-award"></i>
-              <h4>Corporis voluptates</h4>
-              <p>Consequuntur sunt aut quasi enim aliquam quae harum pariatur laboris nisi ut aliquip</p>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
-            <div class="feature-box blue">
-              <i class="bi bi-patch-check"></i>
-              <h4>Explicabo consectetur</h4>
-              <p>Est autem dicta beatae suscipit. Sint veritatis et sit quasi ab aut inventore</p>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-            <div class="feature-box green">
-              <i class="bi bi-sunrise"></i>
-              <h4>Ullamco laboris</h4>
-              <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt</p>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
-            <div class="feature-box red">
-              <i class="bi bi-shield-check"></i>
-              <h4>Labore consequatur</h4>
-              <p>Aut suscipit aut cum nemo deleniti aut omnis. Doloribus ut maiores omnis facere</p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Features Cards Section -->
-
+    </section> 
     <!-- Features 2 Section -->
-    <section id="features" class="features-2 section">
+    <section id="features-section" class="features-2 section">
       <div class="container section-title" data-aos="fade-up">
         <h2>Features</h2>
       </div>
@@ -505,247 +273,10 @@
         </div>
 
       </div>
-
-    </section><!-- /Features 2 Section -->
-
-    <!-- Call To Action Section -->
-    <!-- <section id="call-to-action" class="call-to-action section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row content justify-content-center align-items-center position-relative">
-          <div class="col-lg-8 mx-auto text-center">
-            <h2 class="display-4 mb-4">Maecenas tempus tellus eget condimentum</h2>
-            <p class="mb-4">Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec velit neque, auctor sit amet aliquam vel</p>
-            <a href="#" class="btn btn-cta">Call To Action</a>
-          </div>
-
-          <div class="shape shape-1">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              <path d="M47.1,-57.1C59.9,-45.6,68.5,-28.9,71.4,-10.9C74.2,7.1,71.3,26.3,61.5,41.1C51.7,55.9,35,66.2,16.9,69.2C-1.3,72.2,-21,67.8,-36.9,57.9C-52.8,48,-64.9,32.6,-69.1,15.1C-73.3,-2.4,-69.5,-22,-59.4,-37.1C-49.3,-52.2,-32.8,-62.9,-15.7,-64.9C1.5,-67,34.3,-68.5,47.1,-57.1Z" transform="translate(100 100)"></path>
-            </svg>
-          </div>
-
-          <div class="shape shape-2">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              <path d="M41.3,-49.1C54.4,-39.3,66.6,-27.2,71.1,-12.1C75.6,3,72.4,20.9,63.3,34.4C54.2,47.9,39.2,56.9,23.2,62.3C7.1,67.7,-10,69.4,-24.8,64.1C-39.7,58.8,-52.3,46.5,-60.1,31.5C-67.9,16.4,-70.9,-1.4,-66.3,-16.6C-61.8,-31.8,-49.7,-44.3,-36.3,-54C-22.9,-63.7,-8.2,-70.6,3.6,-75.1C15.4,-79.6,28.2,-58.9,41.3,-49.1Z" transform="translate(100 100)"></path>
-            </svg>
-          </div>
-
-          <div class="dots dots-1">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <pattern id="dot-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="2" fill="currentColor"></circle>
-              </pattern>
-              <rect width="100" height="100" fill="url(#dot-pattern)"></rect>
-            </svg>
-          </div>
-
-          <div class="dots dots-2">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <pattern id="dot-pattern-2" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="2" fill="currentColor"></circle>
-              </pattern>
-              <rect width="100" height="100" fill="url(#dot-pattern-2)"></rect>
-            </svg>
-          </div>
-
-          <div class="shape shape-3">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              <path d="M43.3,-57.1C57.4,-46.5,71.1,-32.6,75.3,-16.2C79.5,0.2,74.2,19.1,65.1,35.3C56,51.5,43.1,65,27.4,71.7C11.7,78.4,-6.8,78.3,-23.9,72.4C-41,66.5,-56.7,54.8,-65.4,39.2C-74.1,23.6,-75.8,4,-71.7,-13.2C-67.6,-30.4,-57.7,-45.2,-44.3,-56.1C-30.9,-67,-15.5,-74,0.7,-74.9C16.8,-75.8,33.7,-70.7,43.3,-57.1Z" transform="translate(100 100)"></path>
-            </svg>
-          </div>
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Call To Action Section -->
-
-    <!-- Clients Section -->
-    <!-- <section id="clients" class="clients section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="swiper init-swiper">
-          <script type="application/json" class="swiper-config">
-            {
-              "loop": true,
-              "speed": 600,
-              "autoplay": {
-                "delay": 5000
-              },
-              "slidesPerView": "auto",
-              "pagination": {
-                "el": ".swiper-pagination",
-                "type": "bullets",
-                "clickable": true
-              },
-              "breakpoints": {
-                "320": {
-                  "slidesPerView": 2,
-                  "spaceBetween": 40
-                },
-                "480": {
-                  "slidesPerView": 3,
-                  "spaceBetween": 60
-                },
-                "640": {
-                  "slidesPerView": 4,
-                  "spaceBetween": 80
-                },
-                "992": {
-                  "slidesPerView": 6,
-                  "spaceBetween": 120
-                }
-              }
-            }
-          </script>
-          <div class="swiper-wrapper align-items-center">
-            <div class="swiper-slide"><img src="assets/img/clients/client-1.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-2.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-3.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-4.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-5.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-6.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-7.png" class="img-fluid" alt=""></div>
-            <div class="swiper-slide"><img src="assets/img/clients/client-8.png" class="img-fluid" alt=""></div>
-          </div>
-          <div class="swiper-pagination"></div>
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Clients Section -->
-
-    <!-- Testimonials Section -->
-    <!-- <section id="testimonials" class="testimonials section light-background">
-
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Testimonials</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-      </div>
-
-      <div class="container">
-
-        <div class="row g-5">
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="testimonial-item">
-              <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img" alt="">
-              <h3>Saul Goodman</h3>
-              <h4>Ceo &amp; Founder</h4>
-              <div class="stars">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-              <p>
-                <i class="bi bi-quote quote-icon-left"></i>
-                <span>Proin iaculis purus consequat sem cure digni ssim donec porttitora entum suscipit rhoncus. Accusantium quam, ultricies eget id, aliquam eget nibh et. Maecen aliquam, risus at semper.</span>
-                <i class="bi bi-quote quote-icon-right"></i>
-              </p>
-            </div>
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
-            <div class="testimonial-item">
-              <img src="assets/img/testimonials/testimonials-2.jpg" class="testimonial-img" alt="">
-              <h3>Sara Wilsson</h3>
-              <h4>Designer</h4>
-              <div class="stars">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-              <p>
-                <i class="bi bi-quote quote-icon-left"></i>
-                <span>Export tempor illum tamen malis malis eram quae irure esse labore quem cillum quid cillum eram malis quorum velit fore eram velit sunt aliqua noster fugiat irure amet legam anim culpa.</span>
-                <i class="bi bi-quote quote-icon-right"></i>
-              </p>
-            </div>
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="testimonial-item">
-              <img src="assets/img/testimonials/testimonials-3.jpg" class="testimonial-img" alt="">
-              <h3>Jena Karlis</h3>
-              <h4>Store Owner</h4>
-              <div class="stars">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-              <p>
-                <i class="bi bi-quote quote-icon-left"></i>
-                <span>Enim nisi quem export duis labore cillum quae magna enim sint quorum nulla quem veniam duis minim tempor labore quem eram duis noster aute amet eram fore quis sint minim.</span>
-                <i class="bi bi-quote quote-icon-right"></i>
-              </p>
-            </div>
-          </div>
-
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
-            <div class="testimonial-item">
-              <img src="assets/img/testimonials/testimonials-4.jpg" class="testimonial-img" alt="">
-              <h3>Matt Brandon</h3>
-              <h4>Freelancer</h4>
-              <div class="stars">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-              <p>
-                <i class="bi bi-quote quote-icon-left"></i>
-                <span>Fugiat enim eram quae cillum dolore dolor amet nulla culpa multos export minim fugiat minim velit minim dolor enim duis veniam ipsum anim magna sunt elit fore quem dolore labore illum veniam.</span>
-                <i class="bi bi-quote quote-icon-right"></i>
-              </p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Testimonials Section -->
-
-    <!-- Stats Section -->
-    <!-- <section id="stats" class="stats section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4">
-
-          <div class="col-lg-3 col-md-6">
-            <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="232" data-purecounter-duration="1" class="purecounter"></span>
-              <p>Clients</p>
-            </div>
-          </div>
-
-          <div class="col-lg-3 col-md-6">
-            <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="521" data-purecounter-duration="1" class="purecounter"></span>
-              <p>Projects</p>
-            </div>
-          </div>
-
-          <div class="col-lg-3 col-md-6">
-            <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="1453" data-purecounter-duration="1" class="purecounter"></span>
-              <p>Hours Of Support</p>
-            </div>
-          </div>
-
-          <div class="col-lg-3 col-md-6">
-            <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="32" data-purecounter-duration="1" class="purecounter"></span>
-              <p>Workers</p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Stats Section -->
-
-    <!-- Services Section -->
-    <section id="services" class="services section light-background">
+    </section>
+    <!-- /Features 2 Section -->
+    <!-- future enhancement Section -->
+    <section id="services-section" class="services section light-background">
 
       <div class="container section-title" data-aos="fade-up">
         <h2>Future Enhancements</h2>
@@ -811,139 +342,8 @@
 
       </div>
 
-    </section><!-- /Services Section -->
-
-    <!-- Pricing Section -->
-    <!-- <section id="pricing" class="pricing section light-background">
-
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Pricing</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-      </div>
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row g-4 justify-content-center">
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="pricing-card">
-              <h3>Basic Plan</h3>
-              <div class="price">
-                <span class="currency">$</span>
-                <span class="amount">9.9</span>
-                <span class="period">/ month</span>
-              </div>
-              <p class="description">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam.</p>
-
-              <h4>Featured Included:</h4>
-              <ul class="features-list">
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Duis aute irure dolor
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Excepteur sint occaecat
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Nemo enim ipsam voluptatem
-                </li>
-              </ul>
-
-              <a href="#" class="btn btn-primary">
-                Buy Now
-                <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="pricing-card popular">
-              <div class="popular-badge">Most Popular</div>
-              <h3>Standard Plan</h3>
-              <div class="price">
-                <span class="currency">$</span>
-                <span class="amount">19.9</span>
-                <span class="period">/ month</span>
-              </div>
-              <p class="description">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum.</p>
-
-              <h4>Featured Included:</h4>
-              <ul class="features-list">
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Lorem ipsum dolor sit amet
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Consectetur adipiscing elit
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Sed do eiusmod tempor
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Ut labore et dolore magna
-                </li>
-              </ul>
-
-              <a href="#" class="btn btn-light">
-                Buy Now
-                <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </div>
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="pricing-card">
-              <h3>Premium Plan</h3>
-              <div class="price">
-                <span class="currency">$</span>
-                <span class="amount">39.9</span>
-                <span class="period">/ month</span>
-              </div>
-              <p class="description">Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae.</p>
-
-              <h4>Featured Included:</h4>
-              <ul class="features-list">
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Temporibus autem quibusdam
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Saepe eveniet ut et voluptates
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Nam libero tempore soluta
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Cumque nihil impedit quo
-                </li>
-                <li>
-                  <i class="bi bi-check-circle-fill"></i>
-                  Maxime placeat facere possimus
-                </li>
-              </ul>
-
-              <a href="#" class="btn btn-primary">
-                Buy Now
-                <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Pricing Section -->
-
+    </section>
+    <!-- /Services Section -->
     <!-- Faq Section -->
     <section class="faq-9 faq section light-background" id="faq">
 
@@ -1016,190 +416,125 @@
 
         </div>
       </div>
-    </section><!-- /Faq Section -->
-
-    <!-- Call To Action 2 Section -->
-    <!-- <section id="call-to-action-2" class="call-to-action-2 section dark-background">
-
-      <div class="container">
-        <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
-          <div class="col-xl-10">
-            <div class="text-center">
-              <h3>Call To Action</h3>
-              <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-              <a class="cta-btn" href="#">Call To Action</a>
-            </div>
-          </div>
+    </section>
+    <!-- /Faq Section -->
+    <section id="terms-section" style="display: none;" class="features-2 section light-background">
+        <div class="container section-title mt-5" data-aos="fade-up"  data-aos-delay="400">
+            <h2>Terms And Conditions</h2>
         </div>
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+          <p>These terms and conditions outline the rules and regulations for using our website and the services provided by RoririSoft.com, a web app and ERP development company. By accessing or using our website and services, you agree to these terms and conditions. If you do not agree with any part of these terms, please refrain from using our website or services.</p>
+          <h4 style="color:#0d83fd">1. Use of Website</h4>
+          <p>You agree to use our website and services solely for lawful purposes and in compliance with these terms and conditions.</p>
+          <h4 style="color:#0d83fd">2. Intellectual Property</h4>
+          <p>👉  All content, trademarks, and intellectual property displayed on our website are owned by RoririSoft.com or its licensors.<br>
+          👉 You are not permitted to use, reproduce, modify, or distribute any content from our website without prior written consent.
+          <h4 style="color:#0d83fd">3.Privacy Policy </h4>
+          <p>Your use of our website and services is subject to our Privacy Policy, which details how we collect, use, and protect your personal information.</p>
+          <h4 style="color:#0d83fd">4.Third-Party Links </h4>
+          <p>Our website may include links to third-party websites or services not controlled or owned by RoririSoft.com<br>
+            We are not responsible for the content, privacy practices, or terms of use of any third-party websites or services.
+          </p>
+          <h4 style="color:#0d83fd">5.Disclaimer of Warranties </h4>
+          <p>👉 While we strive to provide accurate and up-to-date information, RoririSoft.com makes no guarantees about the completeness, accuracy, reliability, or availability of the information, products, or services on our website.<br>
+          👉 Your use of our website and services is at your own risk. We disclaim all warranties, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+          </p>
+          <h4 style="color:#0d83fd">6.Limitation of Liability </h4>
+          <p>RoririSoft.com shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from your use of our website or services.</p>
+          <h4 style="color:#0d83fd">7.Governing Law </h4>
+          <p>These terms and conditions are governed by and construed in accordance with the laws of India, without regard to its conflict of law provisions.</p>
+          <h4 style="color:#0d83fd">8.Changes to Terms </h4>
+          <p>We reserve the right to update or modify these terms and conditions at any time without prior notice. Your continued use of our website and services constitutes acceptance of the revised terms</p>
+          <h4 style="color:#0d83fd">9.Contact Us</h4>
+          <p>If you have any questions or concerns regarding these terms and conditions, please contact us at info@roririsoft.com.<br><br>
+            By using our website and services, you acknowledge that you have read, understood, and agree to be bound by these terms and conditions. If you do not agree with any part of these terms, please discontinue your use of our website and services.
+          </p>
+        </div>
+    </section>
+    <section id="privacy-policy" class="features-2 section light-background" style="display: none;">
+      <div class="container section-title mt-5" data-aos="fade-up"  data-aos-delay="400">
+        <h2>Privacy & Policy</h2>
       </div>
-
-    </section> -->
-    <!-- /Call To Action 2 Section -->
-
-    <!-- Contact Section -->
-    <!-- <section id="contact" class="contact section light-background">
-
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Contact</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-      </div>
-
       <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row g-4 g-lg-5">
-          <div class="col-lg-5">
-            <div class="info-box" data-aos="fade-up" data-aos-delay="200">
-              <h3>Contact Info</h3>
-              <p>Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ante ipsum primis.</p>
-
-              <div class="info-item" data-aos="fade-up" data-aos-delay="300">
-                <div class="icon-box">
-                  <i class="bi bi-geo-alt"></i>
-                </div>
-                <div class="content">
-                  <h4>Our Location</h4>
-                  <p>A108 Adam Street</p>
-                  <p>New York, NY 535022</p>
-                </div>
-              </div>
-
-              <div class="info-item" data-aos="fade-up" data-aos-delay="400">
-                <div class="icon-box">
-                  <i class="bi bi-telephone"></i>
-                </div>
-                <div class="content">
-                  <h4>Phone Number</h4>
-                  <p>+1 5589 55488 55</p>
-                  <p>+1 6678 254445 41</p>
-                </div>
-              </div>
-
-              <div class="info-item" data-aos="fade-up" data-aos-delay="500">
-                <div class="icon-box">
-                  <i class="bi bi-envelope"></i>
-                </div>
-                <div class="content">
-                  <h4>Email Address</h4>
-                  <p>info@example.com</p>
-                  <p>contact@example.com</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-7">
-            <div class="contact-form" data-aos="fade-up" data-aos-delay="300">
-              <h3>Get In Touch</h3>
-              <p>Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ante ipsum primis.</p>
-
-              <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="200">
-                <div class="row gy-4">
-
-                  <div class="col-md-6">
-                    <input type="text" name="name" class="form-control" placeholder="Your Name" required="">
-                  </div>
-
-                  <div class="col-md-6 ">
-                    <input type="email" class="form-control" name="email" placeholder="Your Email" required="">
-                  </div>
-
-                  <div class="col-12">
-                    <input type="text" class="form-control" name="subject" placeholder="Subject" required="">
-                  </div>
-
-                  <div class="col-12">
-                    <textarea class="form-control" name="message" rows="6" placeholder="Message" required=""></textarea>
-                  </div>
-
-                  <div class="col-12 text-center">
-                    <div class="loading">Loading</div>
-                    <div class="error-message"></div>
-                    <div class="sent-message">Your message has been sent. Thank you!</div>
-
-                    <button type="submit" class="btn">Send Message</button>
-                  </div>
-
-                </div>
-              </form>
-
-            </div>
-          </div>
-
+        <p>At RoririSoft.com, your privacy is our priority. As a web app and ERP development company, we are dedicated to safeguarding the personal information you entrust to us. This Privacy Policy explains how we collect, use, and protect your data when you visit our website or utilize our services.</p>
+          <h4 style="color:#0d83fd">1. Information We Collect</h4>
+          <p><b>Personal Information:</b><br>
+            We may collect personal details such as your name, email address, phone number, and company information when you interact with our website or services.<br>
+            <b>Usage Data:</b><br>
+            We also gather data about your interactions with our website, including your IP address, browser type, device details, and the pages you visit.
+          </p>
+          <h4 style="color:#0d83fd">2. How We Use Your Information</h4>
+          <p>👉 To deliver and maintain our services effectively.<br>
+          👉 To communicate updates about our products and services.<br>
+          👉 To enhance our website and services based on user feedback and behavior.<br>
+          👉 To analyze trends, monitor website performance, and prevent fraud or abuse.
+          </p>
+          <h4 style="color:#0d83fd">3.Data Security </h4>
+          <p>We employ robust security measures to protect your information from unauthorized access, alteration, disclosure, or destruction.</p>
+          <h4 style="color:#0d83fd">4.Third-Party Services </h4>
+          <p>We may engage third-party services, such as analytics providers and payment processors, to support our operations. These third parties access your information only as needed to perform their services and are required to ensure its confidentiality and security.</p>
+          <h4 style="color:#0d83fd">5.Cookies </h4>
+          <p>We use cookies and similar technologies to enhance your browsing experience, analyze website traffic, and personalize content. You can manage or disable cookies through your browser settings.</p>
+          <h4 style="color:#0d83fd">6.Your Rights </h4>
+          <p><b>Personal Information:</b><br>
+          👉  Access the personal information we hold about you.<br>
+          👉  Request updates or corrections to your data.<br>
+          👉  Request the deletion of your personal information.<br>
+          👉  For any questions or requests regarding your data, please contact us using the information provided below.
+          </p>
+          <h4 style="color:#0d83fd">7.Changes to this Policy </h4>
+          <p>We may update this Privacy Policy periodically to reflect changes in our practices or legal requirements. Significant updates will be communicated by posting the revised policy on our website.</p>
+          <h4 style="color:#0d83fd">8.Contact Us</h4>
+          <p>For any inquiries, concerns, or requests related to this Privacy Policy, please contact us at: Email: privacy@roririsoft.com<br>
+            By using our website or services, you consent to the terms outlined in this Privacy Policy.
+          </p>
         </div>
-
-      </div>
-
-    </section> -->
-    <!-- /Contact Section -->
-
+    </section>
   </main>
 
   <footer id="footer" class="footer">
 
     <div class="container footer-top">
       <div class="row gy-4">
-        <div class="col-lg-4 col-md-6 footer-about">
-          <a href="index.html" class="logo d-flex align-items-center">
+        <div class="col-lg-3 col-md-6 footer-about">
+          <a href="" class="logo d-flex align-items-center">
+          <img src="/images/logororiri.png" alt="">
             <span class="sitename">Roriri HRMS</span>
           </a>
-          <div class="footer-contact pt-3">
-            <p>RORIRI IT PARK, ,KALAKAD, Tirunelveli,</p>
-            <p>Tamilnadu, India - 627502</p>
+          <div class="footer-contact">
             <p class="mt-3"><strong>Phone:</strong> <span>+91 73389 41579</span></p>
             <p><strong>Email:</strong> <span>contact@roririsoft.com</span></p>
           </div>
-          <div class="social-links d-flex mt-4">
-            <a href=""><i class="bi bi-twitter-x"></i></a>
-            <a href=""><i class="bi bi-facebook"></i></a>
-            <a href=""><i class="bi bi-instagram"></i></a>
-            <a href="https://in.linkedin.com/company/roriri-software-solutions-pvt-ltd"><i class="bi bi-linkedin"></i></a>
+        </div>
+        <div class="col-lg-3 col-md-3 footer-about">
+        <h4>Head Office</h4>
+          <div class="footer-contact">
+            <p>RORIRI IT PARK, KALAKAD, Tirunelveli,</p>
+            <p>Tamilnadu, India - 627502</p>
+            <div class="social-links d-flex mt-4">
+              <a href="https://www.youtube.com/@roriri_soft"><i class="bi bi-youtube"></i></a>
+              <a href="https://www.facebook.com/RoririSoftwareSolutionsPvtLtd/"><i class="bi bi-facebook"></i></a>
+              <a href="https://www.instagram.com/roriri_soft/?igsh=MTJmMHMxNm5pOTIy#"><i class="bi bi-instagram"></i></a>
+              <a href="https://in.linkedin.com/company/roriri-software-solutions-pvt-ltd"><i class="bi bi-linkedin"></i></a>
+            </div>
           </div>
         </div>
-
         <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Useful Links</h4>
+          <h4>Quick Links</h4>
           <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About us</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Terms of service</a></li>
-            <li><a href="#">Privacy policy</a></li>
+            <li><a href="#home-section" onclick="showMainSections()" class="active">Home</a></li>
+            <li><a href="#features-section" onclick="showMainSections()">Key Features</a></li>
+            <li><a href="#enhancement-section" onclick="showMainSections()">Future Enhancements</a></li>
+        </ul>
+        </div>
+        <div class="col-lg-2 col-md-3 footer-links">
+        <h4></h4>
+          <ul>
+          <li>
+          <li><a href="javascript:void(0);" onclick="showOnly('terms-section')">Terms of Service</a></li>
+          <li><a href="javascript:void(0);" onclick="showOnly('privacy-policy')">Privacy & Policy</a></li>
           </ul>
         </div>
-
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Our Services</h4>
-          <ul>
-            <li><a href="#">Web Design</a></li>
-            <li><a href="#">Web Development</a></li>
-            <li><a href="#">Product Management</a></li>
-            <li><a href="#">Marketing</a></li>
-            <li><a href="#">Graphic Design</a></li>
-          </ul>
-        </div>
-
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Hic solutasetp</h4>
-          <ul>
-            <li><a href="#">Molestiae accusamus iure</a></li>
-            <li><a href="#">Excepturi dignissimos</a></li>
-            <li><a href="#">Suscipit distinctio</a></li>
-            <li><a href="#">Dilecta</a></li>
-            <li><a href="#">Sit quas consectetur</a></li>
-          </ul>
-        </div>
-
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Nobis illum</h4>
-          <ul>
-            <li><a href="#">Ipsam</a></li>
-            <li><a href="#">Laudantium dolorum</a></li>
-            <li><a href="#">Dinera</a></li>
-            <li><a href="#">Trodelas</a></li>
-            <li><a href="#">Flexo</a></li>
-          </ul>
-        </div>
-
       </div>
     </div>
 
@@ -1210,7 +545,7 @@
         <!-- You can delete the links only if you've purchased the pro version. -->
         <!-- Licensing information: https://bootstrapmade.com/license/ -->
         <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        <!-- Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> -->
       </div>
     </div>
 
@@ -1229,6 +564,34 @@
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script>
+    function showMainSections() {
+        // Show all main sections
+        document.getElementById("home-section").style.display = "block";
+        document.getElementById("features-section").style.display = "block";
+        document.getElementById("services-section").style.display = "block";
+        document.getElementById("faq").style.display = "block";
+
+        // Hide Terms and Privacy sections
+        document.getElementById("terms-section").style.display = "none";
+        document.getElementById("privacy-policy").style.display = "none";
+    }
+
+    function showOnly(sectionId) {
+        // Hide all main sections
+        document.getElementById("home-section").style.display = "none";
+        document.getElementById("features-section").style.display = "none";
+        document.getElementById("services-section").style.display = "none";
+        document.getElementById("faq").style.display = "none";
+
+        // Show only the selected section (Terms or Privacy)
+        document.getElementById("terms-section").style.display = "none";
+        document.getElementById("privacy-policy").style.display = "none";
+        
+        document.getElementById(sectionId).style.display = "block";
+    }
+</script>
+
 
 </body>
 

@@ -12,6 +12,12 @@ use App\Http\Controllers\TaskController;
 Route::get('/', function () {
     return view('landing'); 
 })->name('landing');
+Route::get('/privacypolicy', function () {
+    return view('privacypolicy'); 
+})->name('privacypolicy');
+Route::get('/termsconditions', function () {
+    return view('termsconditions'); 
+})->name('termsconditions');
 Route::get('/dashboard', function () {
     return view('home');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -25,7 +31,6 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
     Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('users', UserController::class);
     Route::resource('role', RoleController::class);
-    Route::post('/department/{id}/delete', [DepartmentController::class, 'destroy'])->name('department.destroy');
     Route::resource('department', DepartmentController::class);
     Route::resource('tasks', TaskController::class);
     Route::get('/get-user-department', [TaskController::class, 'getUserDepartment'])->name('getUserDepartment');

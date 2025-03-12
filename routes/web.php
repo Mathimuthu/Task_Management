@@ -12,12 +12,6 @@ use App\Http\Controllers\TaskController;
 Route::get('/', function () {
     return view('landing'); 
 })->name('landing');
-Route::get('/privacypolicy', function () {
-    return view('privacypolicy'); 
-})->name('privacypolicy');
-Route::get('/termsconditions', function () {
-    return view('termsconditions'); 
-})->name('termsconditions');
 Route::get('/dashboard', function () {
     return view('home');
 })->middleware(['auth', 'verified'])->name('dashboard');

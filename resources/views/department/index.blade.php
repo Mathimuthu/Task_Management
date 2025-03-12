@@ -210,18 +210,17 @@
         $(document).on('click', '.delete-btn', function() {
             let url = $(this).data('url');
             let id = $(this).data('id');
-
-            if (confirm("Are you sure you want to delete this department?")) {
+            if (confirm("Are you sure you want to deactivate this Department?")) {
                 $.ajax({
                     url: url,
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        _method:"DELETE",
+                        _method: "DELETE",
                         id:id
                     },
                     success: function(response) {
-                        $('#departmentTable').DataTable().ajax.reload(); 
+                        $('#departmentTable').DataTable().ajax.reload();
                     },
                     error: function() {
                         alert("Error processing request.");

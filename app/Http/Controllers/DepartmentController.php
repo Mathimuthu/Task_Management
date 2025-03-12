@@ -266,10 +266,8 @@ class DepartmentController extends Controller
         if (!$this->checkPermissionBasedRole('delete department')) {
             return response()->json(['error' => 'Permission denied']);
         }
-        $departmentData = [];
-        $departmentData['status'] = 0;
         $department = Department::find($id);
-        $department->update($departmentData);
+        $department->update(['status' => 0]); 
         return redirect()->route('department.index')->with('success', 'Department deleted successfully!');
     }
 }

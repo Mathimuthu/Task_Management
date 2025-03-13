@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Roriri HRMS</title>
+  <title>Roriri TMS</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -43,7 +43,7 @@
 
       <a href="#home-section" class="logo d-flex align-items-center me-auto me-xl-0">
         <img src="/images/logororiri.png" alt="">
-        <h1 class="sitename">Roriri HRMS</h1>
+        <h1 class="sitename">Roriri TMS</h1>
       </a>
 
       <nav id="navmenu" class="navmenu">

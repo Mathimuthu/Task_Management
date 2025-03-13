@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'Roriri HRMS',
+    'title' => 'Roriri TMS',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<b>Roriri</b> HRMS',
+    'logo' => '<b>Roriri</b> TMS',
     'logo_img' => '/images/logororiri.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,

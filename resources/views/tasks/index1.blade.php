@@ -254,7 +254,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "/tasks/" + taskId,
+                        url: "/mytasks/" + taskId,
                         type: "PUT",
                         data: {
                             status: newStatus,
@@ -368,24 +368,18 @@
         function submitTaskForm() {
             let isSubmitting = false;
 
-            $('#addTaskForm').submit(function(e) {
+            $('#addTaskForm').off('submit').on('submit', function (e) {
                 e.preventDefault();
 
-                // Ensure that the form is not being submitted more than once
-                if (isSubmitting) return; 
+                if (isSubmitting) return;
                 isSubmitting = true;
 
-                // Disable the submit button and show loading state
                 let submitButton = $('#submitButton');
                 submitButton.prop('disabled', true);
                 submitButton.html('<i class="fa fa-spinner fa-spin"></i> Saving...');
-
-                // Get the file from the form
-                var fileInput = $('#upload_task')[0]; // Assuming upload_task is the ID of the file input
-                var file = fileInput.files[0];
-                var maxSize = 40 * 1024 * 1024; // 40MB in bytes
-
-                // Check if the file size exceeds the maximum size
+                let fileInput = $('#upload_task')[0];
+                let file = fileInput.files[0];
+                let maxSize = 40 * 1024 * 1024;
                 if (file && file.size > maxSize) {
                     submitButton.prop('disabled', false);
                     submitButton.html('Save Task');
@@ -393,35 +387,27 @@
                     isSubmitting = false;
                     return;
                 }
-
-                // Create FormData object to send the form data, including files
-                var formData = new FormData(this); 
-
-                // Send the form data via AJAX
+                var formData = new FormData(this);
                 $.ajax({
                     url: "{{ route('tasks.store') }}",
                     type: "POST",
                     data: formData,
-                    contentType: false, 
-                    processData: false, 
-                    success: function(response) {
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
                         if (response.success == 1) {
-                            submitButton.prop('disabled', false);
-                            submitButton.html('Save Task');
                             $('#modalTask').modal('hide');
                             $('#taskTable').DataTable().ajax.reload();
                         } else {
-                            submitButton.prop('disabled', false);
-                            submitButton.html('Save Task');
                             alert(response.msg);
                         }
                     },
-                    error: function() {
-                        submitButton.prop('disabled', false);
-                        submitButton.html('Save Task');
+                    error: function () {
                         alert('Error adding task.');
                     },
-                    complete: function() {
+                    complete: function () {
+                        submitButton.prop('disabled', false);
+                        submitButton.html('Save Task');
                         isSubmitting = false;
                     }
                 });

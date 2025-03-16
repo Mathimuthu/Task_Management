@@ -171,10 +171,10 @@ class TaskController extends Controller
                 }
         
                 $returnData = "";
-                if ($this->checkPermissionBasedRole('write tasks')) {
+                if ($this->checkPermissionBasedRole('write mytasks')) {
                     $returnData = $editButton ;
                 }
-                if ($this->checkPermissionBasedRole('delete tasks')) {
+                if ($this->checkPermissionBasedRole('delete mytasks')) {
                     $returnData .= $deleteButton;
                 }
                 if ($restoreButton) {
@@ -190,10 +190,10 @@ class TaskController extends Controller
                                     ⋯
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton-' . $task->id . '">';
-                if ($this->checkPermissionBasedRole('write tasks')) {
+                if ($this->checkPermissionBasedRole('write mytasks')) {
                     $mobileMenu .= '<a class="dropdown-item edit-btn" href="#" data-url="' . route('tasks.edit', $task->id) . '">Edit</a>';
                 }
-                if ($this->checkPermissionBasedRole('delete tasks')) {
+                if ($this->checkPermissionBasedRole('delete mytasks')) {
                     $mobileMenu .= '<a class="dropdown-item delete-btn" href="#" data-url="' . route('tasks.destroy', $task->id) . '" data-id="' . $task->id . '">Delete</a>';
                 }
                 if ($restoreButton) {

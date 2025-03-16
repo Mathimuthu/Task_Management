@@ -21,7 +21,6 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
         return redirect()->route('landing'); 
     })->name('login');
     
-    Route::get('mytasks', [TaskController::class, 'mytasks'])->name('mytasks');
     Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('users', UserController::class);
     Route::resource('role', RoleController::class);
@@ -31,6 +30,14 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
     Route::post('/tasks/{id}/restore', [TaskController::class, 'restore'])->name('tasks.restore');
 });
 Route::middleware(['auth'])->group(function () {
+    // ✅ Define My Tasks Routes Correctly
+    Route::get('mytasks', [TaskController::class, 'mytasks'])->name('mytasks');
+    Route::post('mytasks', [TaskController::class, 'store'])->name('tasks.store'); // ✅ Add Store Route
+    Route::get('mytasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');  
+    Route::put('mytasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+    Route::delete('mytasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy'); // ✅ DELETE route
+    Route::post('mytasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore'); // ✅ RESTORE route
+
     Route::get('/tasks/status-timeline/{task}', [TaskController::class, 'getTaskTimeline'])->name('tasks.status.timeline');
 });
 // Route::middleware(['auth', 'can:Admin'])->group(function () {

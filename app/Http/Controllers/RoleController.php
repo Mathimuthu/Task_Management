@@ -61,12 +61,25 @@ class RoleController extends Controller
         if (!$this->checkPermissionBasedRole('write role')) {
             return response()->json(['error' => 'Permission denied']);
         }
+    
         $role = Role::findOrFail($id);
+    
+        // Update role name
         $role->update(['name' => $request->name]);
+    
+        // Sync permissions with the role
         $role->syncPermissions($request->permissions);
-
+    
+        // Find users who have this role and update their permissions
+        $users = $role->users; // Assumes you have a users() relationship in your Role model
+    
+        foreach ($users as $user) {
+            $user->syncPermissions($role->permissions);
+        }
+    
         return response()->json(['success' => 'Role updated successfully']);
     }
+    
 
     public function store(Request $request)
     {

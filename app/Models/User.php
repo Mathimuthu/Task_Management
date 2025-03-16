@@ -105,4 +105,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Department::class, 'id', 'manager_id');
     }
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id');
+    }
+
 }

@@ -130,7 +130,18 @@
         font-size: 10px;
     }
 }
+.department-column {
+    white-space: normal !important;
+    word-wrap: break-word;
+    max-width: 90px; /* Adjust width as needed */
+}
 
+/* Ensure status dropdowns do not wrap */
+.status-dropdown {
+    min-width: 100px; /* Prevent shrinking */
+    text-align: center;
+    white-space: nowrap;
+}
 </style>
     <div>
         <div class="d-flex justify-content-between align-items-center mb-3">

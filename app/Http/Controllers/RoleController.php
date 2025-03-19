@@ -21,23 +21,29 @@ class RoleController extends Controller
                 ->addColumn('action', function ($role) {
                     $editButton = '<button class="mr-2 btn btn-sm edit-btn" data-id="' . $role->id . '" title="Edit"><i class="fa fa-edit" style="color:#293fa4"></i></button>';
                     $deleteButton = '<button class="btn btn-sm delete-btn" data-url="' . route('role.destroy', $role->id) . '" title="Delete"><i class="fa fa-trash" style="color:red"></i></button>';
+                    
                     $returnData = "";
+    
                     if ($this->checkPermissionBasedRole('write role')) {
-                        $returnData .=  $editButton;
+                        $returnData .= $editButton;
                     }
-                    if ($this->checkPermissionBasedRole('delete role')) {
-                        $returnData .=  $deleteButton;
+    
+                    // Prevent delete button for default roles
+                    $defaultRoles = ['admin', 'manager', 'employee','hr'];
+                    if ($this->checkPermissionBasedRole('delete role') && !in_array($role->name, $defaultRoles)) {
+                        $returnData .= $deleteButton;
                     }
+    
                     return $returnData;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
-
+    
         $permissions = Permission::all();
         $hasCreatepermissions = $this->checkPermissionBasedRole('write role');
         return view('roles.index', compact('permissions', 'hasCreatepermissions'));
-    }
+    }    
     // Fetch role data for editing
     public function edit($id)
     {
@@ -62,10 +68,9 @@ class RoleController extends Controller
             return response()->json(['error' => 'Permission denied']);
         }
     
-        $role = Role::findOrFail($id);
-    
-        // Update role name
-        $role->update(['name' => $request->name]);
+        $role = Role::findOrFail($id);    
+        $roleName = strtolower($request->name);
+        $role->update(['name' => $roleName]);
     
         // Sync permissions with the role
         $role->syncPermissions($request->permissions);
@@ -86,7 +91,8 @@ class RoleController extends Controller
         if (!$this->checkPermissionBasedRole('write role')) {
             return response()->json(['error' => 'Permission denied']);
         }
-        $role = Role::create(['name' => $request->name]);
+        $roleName = strtolower($request->name);
+        $role = Role::create(['name' => $roleName]);
         $role->syncPermissions($request->permissions);
         return response()->json(['success' => 'Role added successfully']);
     }

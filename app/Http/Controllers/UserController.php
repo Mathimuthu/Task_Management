@@ -192,47 +192,30 @@ class UserController extends Controller
                 if ($request->has('user_id') && !empty($request->user_id)) {
                     $user = User::find($request->user_id);
                     $role = Role::findOrFail($request->role);
-
-                    // Sync the user's role
-                    $user->syncRoles([$role->name]);
-
+                    DB::table('model_has_roles')->where('model_id', $user->id)->delete();
+                    DB::table('model_has_roles')->insert([
+                        'role_id' => $role->id,
+                        'model_id' => $user->id,
+                        'model_type' => User::class,
+                    ]);
                     // Sync permissions based on the role
                     $permissions = $role->permissions->pluck('name')->toArray();
                     $user->syncPermissions($permissions);
-
-                    if ($request->has('department_id')) {
-                        // Get existing managers of the department
-                        $existingDepartment = Department::find($request->department_id);
-                        $currentManagers = $existingDepartment->manager_id ? json_decode($existingDepartment->manager_id) : [];
-                        // Avoid adding the same user multiple times
-                        if (!in_array($user->id, $currentManagers)) {
-                            $currentManagers[] = $user->id; // Add new user to the list
-                        }
-                        $existingDepartment->manager_id = json_encode($currentManagers);
-                        $existingDepartment->save();
-                    } 
                     $user->update($userData);
                     return array('success' => 1, 'msg' => "Employee Updated Successfully");
                 } else {
                     $userData['password'] = bcrypt("12345678");
                     $user = User::create($userData);
                     $role = Role::findOrFail($request->role);
-                    $user->assignRole($role->name);
-                
-                    // Sync permissions from role
+                    // Assign role manually to avoid model_type error
+                    DB::table('model_has_roles')->insert([
+                        'role_id' => $role->id,
+                        'model_id' => $user->id,
+                        'model_type' => User::class,
+                    ]);
+                    // Sync permissions
                     $permissions = $role->permissions->pluck('name')->toArray();
                     $user->syncPermissions($permissions);
-
-                    if ($department) {
-                        // Get current managers, add new user
-                        $currentManagers = $department->manager_id ? json_decode($department->manager_id) : [];
-                        if (!in_array($user->id, $currentManagers)) {
-                            $currentManagers[] = $user->id;
-                        }
-                        // Update the department manager list
-                        $department->manager_id = json_encode($currentManagers);
-                        $department->save();
-                    }
                     return array('success' => 1, 'msg' => "Employee Created Successfully");
                 }
             } catch (\Exception $e) {

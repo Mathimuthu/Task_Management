@@ -263,7 +263,7 @@ class TaskController extends Controller
                 'date' => $request->assign_date,
                 'deadline' => $request->deadline,
                 'department_id' => $request->department_id,
-                'role_id' => $request->role_id,
+                'role_id' => 0,
                 'employee_ids' => (int)$request->employee_ids,
                 'status' => $request->status,
                 'updated_by' => Auth::user()->id,

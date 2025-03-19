@@ -16,6 +16,7 @@ return new class extends Migration
             $table->date('dob')->nullable();
             $table->string('blood_group', 5)->nullable(); 
             $table->string('photo')->nullable(); 
+            $table->integer('created_by')->nullable(); 
         });
     }
 
@@ -25,7 +26,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['address', 'dob', 'blood_group', 'photo']);
+            $table->dropColumn(['address', 'dob', 'blood_group', 'photo','created_by']);
         });
     }
 };

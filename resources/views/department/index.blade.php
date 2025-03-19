@@ -118,7 +118,7 @@
                 <tr>
                     <th>S.No</th>
                     <th>Name</th>
-                    <th>Manager</th>
+                    <!-- <th>Manager</th> -->
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -155,7 +155,7 @@
                 columns: [
                     { data: "id", "render": function(data, type, row, meta) { return meta.row + 1; } },
                     { data: 'name', name: 'name' },
-                    { data: 'manager_name', name: 'manager_name' }, 
+                    // { data: 'manager_name', name: 'manager_name' }, 
                     {
                     data: "status", 
                     name: "status",
@@ -194,9 +194,9 @@
                 success: function(data) {
                     $('#department_id').val(data.id); 
                     $('#name').val(data.name);
-                    let managerIds = JSON.parse(data.manager_id); 
-                    $('#employee_id').val(managerIds).trigger('change'); 
-                    $('#employee_id').select2();
+                    // let managerIds = JSON.parse(data.manager_id); 
+                    // $('#employee_id').val(managerIds).trigger('change'); 
+                    // $('#employee_id').select2();
                     $('#description').val(data.description);
                     $('#modal_Purple .modal-title').text('Edit Department'); 
                     $('#modal_Purple').modal('show');  
@@ -232,8 +232,8 @@
             $('#modal_Purple').modal('show'); 
             $('#department_id').val("");
             $('#name').val("");
-            $('#employee_id').val("");
-            $('#employee_id').val(null).trigger('change');
+            // $('#employee_id').val("");
+            // $('#employee_id').val(null).trigger('change');
             $('#modal_Purple .modal-title').text('Add Department'); 
         }
         function submitDepartmentForm() {
@@ -259,7 +259,7 @@
                             // Clear form fields
                             $('#department_id').val(""); 
                             $('#name').val("");
-                            $('#employee_id').val(""); 
+                            // $('#employee_id').val(""); 
                             $('#description').val(""); 
 
                             // Hide the modal

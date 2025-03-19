@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Jenitta',
                 'mobile' => '1234567890',
                 'password' => bcrypt('12345678'),
-                'role' => 1,
+                'role' => $adminRole->id,
             ]
         );
 
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Michael Scott',
                 'mobile' => '9876543210',
                 'password' => bcrypt('12345678'),
-                'role' => 2, // Assuming 2 represents Manager role
+                'role' => $managerRole->id,
             ]
         );
 
@@ -47,9 +47,16 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Jim Halpert',
                 'mobile' => '5678901234',
                 'password' => bcrypt('12345678'),
-                'role' => 3, // Assuming 3 represents Employee role
+                'role' => $employeeRole->id,
             ]
         );
+
+        // Assign Roles to Users (Fixing model_type issue)
+        DB::table('model_has_roles')->insert([
+            ['role_id' => $adminRole->id, 'model_id' => $admin->id, 'model_type' => User::class],
+            ['role_id' => $managerRole->id, 'model_id' => $manager->id, 'model_type' => User::class],
+            ['role_id' => $employeeRole->id, 'model_id' => $employee->id, 'model_type' => User::class],
+        ]);
 
         // Create Permissions
         $permissions = [
@@ -86,11 +93,6 @@ class DatabaseSeeder extends Seeder
             $perm = Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
             $employeeRole->givePermissionTo($perm);
         }
-
-        // Assign Roles to Users
-        $admin->syncRoles([$adminRole]);
-        $manager->syncRoles([$managerRole]);
-        $employee->syncRoles([$employeeRole]);
 
         // Sync Permissions for Each Role
         $admin->syncPermissions($adminRole->permissions);

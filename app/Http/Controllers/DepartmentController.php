@@ -16,8 +16,9 @@ class DepartmentController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $products = Department::select('departments.*', 'users.name as manager_name')
-                ->leftJoin('users', 'users.id', '=', 'departments.manager_id')
+            // $products = Department::select('departments.*', 'users.name as manager_name')
+               $products = Department::select('departments.*')
+                // ->leftJoin('users', 'users.id', '=', 'departments.manager_id')
                 ->when($request->status, function ($query, $status) {
                     if ($status === 'Active') {
                         return $query->where('departments.status', 1);
@@ -65,16 +66,16 @@ class DepartmentController extends Controller
             
                     return $desktopMenu . $mobileMenu;
                 })
-                ->addColumn('manager_name', function ($product) {
-                    // Check if manager_id is not null or empty
-                    $managerIds = json_decode($product->manager_id, true); // Decode as an array
-                    if (is_array($managerIds) && !empty($managerIds)) {
-                        $managers = User::whereIn('id', $managerIds)->pluck('name')->toArray();
-                        return implode(', ', $managers);
-                    } else {
-                        return 'No manager assigned'; // Return a default message if no manager
-                    }
-                })
+                // ->addColumn('manager_name', function ($product) {
+                //     // Check if manager_id is not null or empty
+                //     $managerIds = json_decode($product->manager_id, true); // Decode as an array
+                //     if (is_array($managerIds) && !empty($managerIds)) {
+                //         $managers = User::whereIn('id', $managerIds)->pluck('name')->toArray();
+                //         return implode(', ', $managers);
+                //     } else {
+                //         return 'No manager assigned'; // Return a default message if no manager
+                //     }
+                // })
                 ->rawColumns(['action'])
                 ->make(true);            
         }
@@ -115,35 +116,35 @@ class DepartmentController extends Controller
                 $department->description = $request->description;
                 $department->status = 1;
     
-                if ($request->has('employee_id')) {
-                    $managerIds = array_unique(array_map('intval', $request->employee_id));
+                // if ($request->has('employee_id')) {
+                //     $managerIds = array_unique(array_map('intval', $request->employee_id));
     
-                    foreach ($managerIds as $managerId) {
-                        $user = User::find($managerId);
-                        if ($user) {
-                            $oldDepartmentId = $user->department_id;
+                //     foreach ($managerIds as $managerId) {
+                //         $user = User::find($managerId);
+                //         if ($user) {
+                //             $oldDepartmentId = $user->department_id;
     
-                            if ($oldDepartmentId != $department->id) {
-                                if ($oldDepartmentId) {
-                                    $oldDepartment = Department::find($oldDepartmentId);
-                                    if ($oldDepartment) {
-                                        $oldManagerIds = json_decode($oldDepartment->manager_id, true);
-                                        $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
-                                        $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
-                                        $oldDepartment->save();
-                                    }
-                                }
+                //             if ($oldDepartmentId != $department->id) {
+                //                 if ($oldDepartmentId) {
+                //                     $oldDepartment = Department::find($oldDepartmentId);
+                //                     if ($oldDepartment) {
+                //                         $oldManagerIds = json_decode($oldDepartment->manager_id, true);
+                //                         $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
+                //                         $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
+                //                         $oldDepartment->save();
+                //                     }
+                //                 }
     
-                                $user->department_id = $department->id;
-                                $user->save();
-                            }
-                        }
-                    }
+                //                 $user->department_id = $department->id;
+                //                 $user->save();
+                //             }
+                //         }
+                //     }
     
-                    $department->manager_id = json_encode(array_values($managerIds));
-                } else {
-                    $department->manager_id = json_encode([]); 
-                }
+                //     $department->manager_id = json_encode(array_values($managerIds));
+                // } else {
+                //     $department->manager_id = json_encode([]); 
+                // }
     
                 $department->save();
             } else {
@@ -151,34 +152,34 @@ class DepartmentController extends Controller
                     'name' => $request->name,
                     'description' => $request->description,
                     'status' => 1,
-                    'manager_id' => $request->has('employee_id') ? json_encode(array_map('intval', $request->employee_id)) : json_encode([]),
+                    // 'manager_id' => $request->has('employee_id') ? json_encode(array_map('intval', $request->employee_id)) : json_encode([]),
                 ]);
-                if ($request->has('employee_id') && !empty($request->employee_id)) {
-                    $managerIds = array_unique(array_map('intval', $request->employee_id));
+                // if ($request->has('employee_id') && !empty($request->employee_id)) {
+                //     $managerIds = array_unique(array_map('intval', $request->employee_id));
 
-                    foreach ($managerIds as $managerId) {
-                        $user = User::find($managerId);
-                        if ($user) {
-                            $oldDepartmentId = $user->department_id;
+                //     foreach ($managerIds as $managerId) {
+                //         $user = User::find($managerId);
+                //         if ($user) {
+                //             $oldDepartmentId = $user->department_id;
 
-                            if ($oldDepartmentId && $oldDepartmentId != $department->id) {
-                                $oldDepartment = Department::find($oldDepartmentId);
-                                if ($oldDepartment) {
-                                    $oldManagerIds = json_decode($oldDepartment->manager_id, true) ?? [];
-                                    $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
-                                    $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
-                                    $oldDepartment->save();
-                                }
-                            }
-                            $user->department_id = $department->id;
-                            $user->save();
-                        }
-                    }
+                //             if ($oldDepartmentId && $oldDepartmentId != $department->id) {
+                //                 $oldDepartment = Department::find($oldDepartmentId);
+                //                 if ($oldDepartment) {
+                //                     $oldManagerIds = json_decode($oldDepartment->manager_id, true) ?? [];
+                //                     $oldManagerIds = array_filter($oldManagerIds, fn($id) => $id != $managerId);
+                //                     $oldDepartment->manager_id = json_encode(array_values($oldManagerIds));
+                //                     $oldDepartment->save();
+                //                 }
+                //             }
+                //             $user->department_id = $department->id;
+                //             $user->save();
+                //         }
+                //     }
 
-                    $department->manager_id = json_encode(array_values($managerIds));
-                } else {
-                    $department->manager_id = json_encode([]);
-                }
+                //     $department->manager_id = json_encode(array_values($managerIds));
+                // } else {
+                //     $department->manager_id = json_encode([]);
+                // }
 
                 $department->save();
             }
@@ -235,26 +236,26 @@ class DepartmentController extends Controller
         $departmentData['status'] = 1;
         $departmentData['description'] = $request->description;
     
-        $managerIds = $request->employee_id;
-        $existingManagerIds = json_decode(Department::find($id)->manager_id ?? '[]');
+        // $managerIds = $request->employee_id;
+        // $existingManagerIds = json_decode(Department::find($id)->manager_id ?? '[]');
     
-        if ($existingManagerIds) {
-            $managerIds = array_unique(array_merge($existingManagerIds, $managerIds)); // Merge old and new unique manager ids
-        }
+        // if ($existingManagerIds) {
+        //     $managerIds = array_unique(array_merge($existingManagerIds, $managerIds)); // Merge old and new unique manager ids
+        // }
     
-        $departmentData['manager_id'] = json_encode($managerIds); // Store as a JSON string
+        // $departmentData['manager_id'] = json_encode($managerIds); // Store as a JSON string
     
         $department = Department::find($id);
         $department->update($departmentData);
     
-        foreach ($managerIds as $managerId) {
-            $user = User::find($managerId);
-            if ($user) {
-                // Assign department_id to the user
-                $user->department_id = $department->id;
-                $user->save();
-            }
-        }
+        // foreach ($managerIds as $managerId) {
+        //     $user = User::find($managerId);
+        //     if ($user) {
+        //         // Assign department_id to the user
+        //         $user->department_id = $department->id;
+        //         $user->save();
+        //     }
+        // }
         return redirect()->route('department.index')->with('success', 'Department updated successfully!');
     }
 

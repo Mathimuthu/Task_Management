@@ -13,12 +13,12 @@
                     <div class="modal-body">
                         <label>Name:</label>
                         <input type="text" id="name" name="name" class="form-control" required>
-                        <label class="mt-2">Assign Employee:</label>
+                        <!-- <label class="mt-2">Assign Employee:</label>
                         <select id="employee_id" name="employee_id[]" class="form-control" multiple required>
                             @foreach ($employees as $employee)
                             <option value="{{ $employee->id }}">{{ $employee->name }}</option>
                             @endforeach
-                        </select>
+                        </select> -->
                         <label class="mt-2">Description:</label>
                         <textarea id="description" name="description" class="form-control" rows="3"
                             placeholder="Enter department description"></textarea>

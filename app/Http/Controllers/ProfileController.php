@@ -8,9 +8,33 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\User;
+use App\Models\Task;
 
 class ProfileController extends Controller
 {
+    public function index() {
+        $users = User::where('status', 1)->get();
+        $usercount = $users->count();
+        $task = Task::count();
+        $mytask = Task::where('employee_ids',auth()->user()->id)->count(); 
+    
+        $taskCounts = Task::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+    
+        $statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
+    
+        foreach ($statuses as $status) {
+            $taskCounts[$status] = $taskCounts[$status] ?? 0;
+        }
+    
+        $maxCount = max($taskCounts) ?: 1;
+    
+        return view('home', compact('usercount', 'users', 'task', 'mytask', 'taskCounts', 'maxCount'));
+    }
+    
     /**
      * Display the user's profile form.
      */

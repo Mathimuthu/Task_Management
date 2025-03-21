@@ -266,9 +266,10 @@ class TaskController extends Controller
                 'role_id' => 0,
                 'employee_ids' => (int)$request->employee_ids,
                 'status' => $request->status,
-                'updated_by' => Auth::user()->id,
             ];
-
+            if (!$request->has('task_id') || empty($request->task_id)) {
+                $taskData['updated_by'] = Auth::user()->id;
+            }
             if ($request->hasFile('upload_task')) {
                 $uploadTask = $request->file('upload_task');
                 $maxSize = 41943040; 

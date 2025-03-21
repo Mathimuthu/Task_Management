@@ -257,7 +257,7 @@ return [
     */
 
     'use_route_url' => false,
-    'dashboard_url' => 'home',
+    'dashboard_url' => 'dashboard',
     'logout_url' => 'logout',
     'login_url' => 'login',
     'register_url' => 'register',
@@ -309,7 +309,11 @@ return [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
-
+        [
+            'text' => 'Dashboard',
+            'url' => '/dashboard',
+            'icon' => 'fas fa-fw fa-laptop',
+        ],
         // Sidebar items:
         [
             'header' => 'Employees',

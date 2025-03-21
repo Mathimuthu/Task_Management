@@ -12,9 +12,9 @@ use App\Http\Controllers\TaskController;
 Route::get('/', function () {
     return view('landing'); 
 })->name('landing');
-Route::get('/dashboard', function () {
-    return view('home');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('home');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(function () {
     Route::get('/login', function () {
@@ -31,6 +31,7 @@ Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(fun
 });
 Route::middleware(['auth'])->group(function () {
     // ✅ Define My Tasks Routes Correctly
+    Route::get('dashboard', [ProfileController::class, 'index'])->name('dashboard');
     Route::get('mytasks', [TaskController::class, 'mytasks'])->name('mytasks');
     Route::post('mytasks', [TaskController::class, 'store'])->name('tasks.store'); // ✅ Add Store Route
     Route::get('mytasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');  

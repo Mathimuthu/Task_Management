@@ -113,7 +113,7 @@
                     <th>Deadline</th>
                     <th>Department</th>
                     <th>Assigned Employee</th>
-                    <th>Updated by</th>
+                    <th>Assigned by</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>

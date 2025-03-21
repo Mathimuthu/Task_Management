@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -175,6 +176,7 @@ class UserController extends Controller
                 $userData['name'] = $request->name;
                 $userData['mobile'] = $request->mobile;
                 $userData['email'] = $request->email;
+                $userData['password'] = Hash::make($request['password']);
                 $userData['address'] = $request->address;
                 $userData['dob'] = $request->dob;
                 $userData['blood_group'] = $request->blood_group;

@@ -509,6 +509,7 @@ input:checked + .slider:before {
             $('#name').val("");
             $('#mobile').val("");
             $('#email').val("");
+            $('#password').val("");
             $('#address').val("");
             $('#dob').val("");
             $('#blood_group').val("");
@@ -540,6 +541,7 @@ input:checked + .slider:before {
                             $('#name').val("");
                             $('#mobile').val("");
                             $('#email').val("");
+                            $('#password').val("");
                             $('#address').val("");
                             $('#dob').val("");
                             $('#blood_group').val("");

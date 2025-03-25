@@ -36,9 +36,11 @@ class TaskController extends Controller
                 // Employees only see their assigned tasks
                 $tasksQuery->where('tasks.employee_ids', '=', $user->id);
             } else {
-                // Other roles see tasks assigned to users they created
-                $userIds = User::where('created_by', $user->id)->pluck('id')->toArray();
-                $tasksQuery->whereIn('tasks.employee_ids', $userIds);
+                $userIds = User::where('created_by', $user->id)->pluck('id')->toArray(); // Users created by the logged-in user
+                $tasksQuery->where(function ($query) use ($user, $userIds) {
+                    $query->whereIn('tasks.updated_by', $userIds) // Tasks updated by users created by the logged-in user
+                          ->orWhere('tasks.updated_by', $user->id); // Tasks updated by the logged-in user
+                });                
             }
 
             $tasks = $tasksQuery->get();    

@@ -37,16 +37,20 @@ class ProfileController extends Controller
             ->toArray();     
             $users = User::where('status', 1)->get();
         } else {
-            $tasks = Task::where('employee_ids', $loginuser->id)->get();
-    
-            $mytask = $tasks->where('updated_by', $loginuser->id)->count();
-    
-            $task = $tasks->where('updated_by', '!=', $loginuser->id)->count();
-            $taskCounts = Task::selectRaw('status, COUNT(*) as count')
-            ->where('employee_ids', $loginuser->id)
+            $userIds = User::where('created_by', $loginuser->id)->pluck('id')->toArray(); 
+            $tasks = Task::where(function ($query) use ($loginuser, $userIds) {
+                $query->whereIn('tasks.updated_by', $userIds)
+                    ->orWhere('tasks.updated_by', $loginuser->id);
+            })->get();    
+            $mytask = Task::where('updated_by', $loginuser->id)->where('employee_ids',$loginuser->id)->count();
+            $taskCounts = Task::where(function ($query) use ($loginuser, $userIds) {
+                $query->whereIn('tasks.updated_by', $userIds)
+                      ->orWhere('tasks.updated_by', $loginuser->id);
+            })
+            ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
-            ->toArray();
+            ->toArray();        
             $users = User::where('status', 1)->where('created_by',$loginuser->id)->get();
         }
         $task = $tasks->count();

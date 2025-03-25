@@ -162,6 +162,10 @@ class UserController extends Controller
                 'email',
                 Rule::unique('users', 'email')->ignore($userId),
             ],
+            'registration_no' => [
+                'required',
+                Rule::unique('users', 'registration_no')->ignore($userId),
+            ],
             'role' => 'required',
         ]);
         \Log::info(DB::getQueryLog());

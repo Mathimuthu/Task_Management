@@ -343,6 +343,7 @@
                     $('#department_id').val(data.department_id).change();
                     $('#employee_ids').val(JSON.parse(data.employee_ids)).change();
                     $('#status').val(data.status);
+                    $('#deadline').removeAttr('min');
                     if (data.upload_task) {
                         let fileExtension = data.upload_task.split('.').pop().toLowerCase();
                         if (fileExtension === 'pdf') {
@@ -402,6 +403,7 @@
             $('#employee_ids').val("").change();
             $('#employe').prop('disabled', true);
             $('#submitButton').text("Add Task");
+            $('#deadline').attr('min', "{{ \Carbon\Carbon::today()->toDateString() }}");
         }
 
         // $(document).on('click', '.updateStatusBtn', function() {

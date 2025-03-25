@@ -300,6 +300,7 @@
                     let userId = "{{ auth()->user()->id }}";
                     $('#employee_ids').val(userId).change();
                     $('#employe').val(userId);
+                    $('#deadline').removeAttr('min');
                     $('#employee_ids').prop('disabled', true);
                     $('#status').val(data.status);
                     if (data.upload_task) {
@@ -363,6 +364,7 @@
             $('#employee_ids').val(userId).change();
             $('#employe').val(userId);
             $('#employee_ids').prop('disabled', true);
+            $('#deadline').attr('min', "{{ \Carbon\Carbon::today()->toDateString() }}");
         }
         
         function submitTaskForm() {

@@ -151,31 +151,31 @@ h1 {
 
 </style>
 <div class="container">
-    <!-- <div class="row d-flex justify-content-end flex-wrap">
+  @if(auth()->user()->hasAnyRole('admin'))
+    <div class="row d-flex justify-content-end flex-wrap">
         <div class="col-md-2 col-sm-6 col-12">
             <select id="user_id" class="form-control">
                 <option value="">Select Assignee</option>
+                <option value="all">All</option>
                 @foreach($users as $user)
-                    <option value="{{$user->id}}">{{$user->name}}</option>
+                    <option value="{{$user->id}}">{{$user->name}} ({{$user->getRoleNames()->first()}})</option>
                 @endforeach 
             </select>
         </div>
-        <div class="col-md-2 col-sm-6 col-12 mt-2 mt-sm-0">
-            <button class="btn btn-primary w-100">Get Count</button>
-        </div>
-    </div> -->
+    </div>
+    @endif
     <div class="row mt-2">
+    @if(!auth()->user()->hasAnyRole('employee'))
       <div class="col-md-4">
         <div class="card  box-shadow">
-          <a href="">
           <p><h3 style="margin-left: 20px;  color: black;" id="user-count-container">{{$usercount}}</h3> </p>
           <p style="margin-left: 20px; color: black;" >Total Employees</p>  
           <i class="icon-user ring-img"></i>
         </div>
       </div>
+      @endif
       <div class="col-md-4">
         <div class="card  box-shadow">
-          <a href="">
           <p><h3 style="margin-left: 20px; color: black" id="task-count-container">{{$task}}</h3></p>
           <p style="margin-left: 20px; color: black;">Total Tasks</p>
           <i class="icon-book-open ring-img"></i>
@@ -183,7 +183,6 @@ h1 {
       </div>
       <div class="col-md-4">
         <div class="card  box-shadow">
-          <a href="">
           <p><h3 style="margin-left: 20px; color: black" id="mytask-count-container">{{$mytask}}</h3></p>
           <p style="margin-left: 20px; color: black;">My Tasks</p>
           <i class="icon-pie-chart ring-img"></i>
@@ -263,6 +262,48 @@ h1 {
         adjustBars();
         $(window).resize(adjustBars);
     });
+
+    $(document).ready(function() {
+        $('#user_id').change(function() {
+            var userId = $(this).val();
+            if (userId) {
+                $.ajax({
+                    url: "{{ route('filter.users.tasks') }}",
+                    type: "GET",
+                    data: { user_id: userId },
+                    success: function(response) {
+                        // Update Users List
+                        $('#user-count-container').text(response.users.length);
+
+                        // Update Task Counts
+                        $('#task-count-container').text(response.task);
+                        $('#mytask-count-container').text(response.mytask);
+
+                        // Update Task Management Status bars
+                        updateTaskBars(response.taskCounts);
+                    }
+                });
+            }
+        });
+
+        function updateTaskBars(taskCounts) {
+            let maxCount = Math.max(...Object.values(taskCounts), 1);
+            
+            $('.bar').each(function() {
+                var $bar = $(this);
+                var status = $bar.find('.label').text().trim();
+                var count = taskCounts[status] || 0;
+                
+                let width = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                if (width < 10 && count > 0) width = 10;
+                
+                $bar.attr('data-count', count);
+                $bar.css('width', width + '%');
+                $bar.find('.count').text(count + ' tasks');
+            });
+        }
+    });
+
 </script>
 
 @stop

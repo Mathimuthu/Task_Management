@@ -469,7 +469,7 @@ class TaskController extends Controller
             }
             if (isset($taskDetails['employee_ids'])) {
                 $employees = User::whereIn('id', explode(',', $taskDetails['employee_ids']))->pluck('name')->toArray();
-                $timelineHtml .= '<p><strong>Assigned Employee(s):</strong> ' . implode(', ', $employees) . '</p>';
+                $timelineHtml .= '<p><strong>Assigned Employee:</strong> ' . implode(', ', $employees) . '</p>';
             }
             if (isset($taskDetails['date'])) {
                 $timelineHtml .= '<p><strong>Assign Date:</strong> ' . $taskDetails['date'] . '</p>';

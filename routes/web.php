@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\TaskController;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return view('landing'); 
@@ -15,12 +16,17 @@ Route::get('/', function () {
 // Route::get('/dashboard', function () {
 //     return view('home');
 // })->middleware(['auth', 'verified'])->name('dashboard');
-
+Route::get('/get-user-roles', function () {
+    return response()->json(
+        DB::table('users')
+            ->join('roles', 'users.role', '=', 'roles.id')
+            ->pluck('roles.name', 'users.email')
+    );
+});
 Route::middleware(['auth', '\App\Http\Middleware\CheckPermission:1'])->group(function () {
     Route::get('/login', function () {
         return redirect()->route('landing'); 
     })->name('login');
-    
     Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('users', UserController::class);
     Route::resource('role', RoleController::class);
@@ -38,8 +44,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('mytasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::delete('mytasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy'); // ✅ DELETE route
     Route::post('mytasks/{task}/restore', [TaskController::class, 'restore'])->name('tasks.restore'); // ✅ RESTORE route
-
     Route::get('/tasks/status-timeline/{task}', [TaskController::class, 'getTaskTimeline'])->name('tasks.status.timeline');
+    Route::get('/filter-users-tasks', [ProfileController::class, 'filterUsersAndTasks'])->name('filter.users.tasks');
 });
 // Route::middleware(['auth', 'can:Admin'])->group(function () {
 //     // Resource routes

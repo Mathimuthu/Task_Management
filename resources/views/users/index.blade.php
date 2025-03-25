@@ -450,6 +450,11 @@ input:checked + .slider:before {
                     $('#department_id').val(data.department_id).change();
                     $('#role').val(data.role).change();
                     $('#submitButton').text("Update Employee");
+                    $('#password').removeAttr('required').val(""); 
+                    $('#password').attr("placeholder", "*****");
+                    $(".changepassword").show();
+                    $(".showeye").hide();
+                    $('#changePasswordCheckbox').prop("checked", false); // Uncheck password change checkbox
                     if (data.photo) {
                         $('#photoPreview').attr('src', '{{ asset("") }}' + data.photo);
                         $('#photoPreview').show();
@@ -459,6 +464,29 @@ input:checked + .slider:before {
                 },
                 error: function() {
                     alert("Error fetching data.");
+                }
+            });
+        });
+        $(document).ready(function () {
+            $("#togglePassword").click(function () {
+                let passwordField = $("#password");
+                let icon = $(this).find("i");
+
+                if (passwordField.attr("type") === "password") {
+                    passwordField.attr("type", "text");
+                    icon.removeClass("fa-eye").addClass("fa-eye-slash"); // Change icon
+                } else {
+                    passwordField.attr("type", "password");
+                    icon.removeClass("fa-eye-slash").addClass("fa-eye"); // Change icon
+                }
+            });
+            $("#changePasswordCheckbox").change(function () {
+                if ($(this).is(":checked")) {
+                    $("#password").prop("disabled", false).attr("required", true);
+                    $('#password').attr("placeholder", "Enter new password");
+                } else {
+                    $("#password").prop("disabled", true).removeAttr("required").val(""); // Reset password field
+                    $('#password').attr("placeholder", "*****");
                 }
             });
         });
@@ -514,8 +542,12 @@ input:checked + .slider:before {
             $('#dob').val("");
             $('#blood_group').val("");
             $('#photo').val("");
+            $(".showeye").show();
             $('#submitButton').text("Add Employee");
             $('#registration_no').val("");
+            $('#password').attr('required', true).val("");
+            $('.changepassword').hide(); 
+            $('#password').attr("placeholder", "Enter password");
         }
 
         function submitProductForm() {

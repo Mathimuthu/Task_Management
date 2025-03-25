@@ -68,8 +68,18 @@
             <input type="email" id="email" name="email" placeholder="Enter Email" class="form-control" required>
         </div>
         <div class="form-group">
-            <label for="stock">Password <span style="color: red;">*</span> </label>
-            <input type="password" id="password" name="password" placeholder="Enter Password" class="form-control" required>
+            <label for="password">Password <span style="color: red;">*</span> </label>
+            <div class="input-group">
+                <input type="password" id="password" name="password" placeholder="Enter Password" class="form-control" required>
+                <div class="input-group-append showeye">
+                    <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group changepassword">
+            <input type="checkbox" id="changePasswordCheckbox"> Change Password
         </div>
         <div class="form-group">
             <label for="address">Address <span style="color: red;">*</span> </label>

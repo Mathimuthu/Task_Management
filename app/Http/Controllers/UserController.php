@@ -180,7 +180,6 @@ class UserController extends Controller
                 $userData['name'] = $request->name;
                 $userData['mobile'] = $request->mobile;
                 $userData['email'] = $request->email;
-                $userData['password'] = Hash::make($request['password']);
                 $userData['address'] = $request->address;
                 $userData['dob'] = $request->dob;
                 $userData['blood_group'] = $request->blood_group;
@@ -189,6 +188,9 @@ class UserController extends Controller
                 $userData['department_id'] = $request->department_id;
                 $userData['created_by'] =  Auth::user()->id;
                 $userData['status'] = 1;
+                if (!empty($request->password)) {
+                    $userData['password'] = Hash::make($request->password);
+                }
                 if ($request->hasFile('photo')) {
                     $photo = $request->file('photo');
                     $filename = time() . '.' . $photo->getClientOriginalExtension();
@@ -210,7 +212,6 @@ class UserController extends Controller
                     $user->update($userData);
                     return array('success' => 1, 'msg' => "Employee Updated Successfully");
                 } else {
-                    $userData['password'] = bcrypt("12345678");
                     $user = User::create($userData);
                     $role = Role::findOrFail($request->role);
                     // Assign role manually to avoid model_type error
